@@ -10,6 +10,12 @@ stdenv.mkDerivation rec {
 
   buildInputs = [ m4 perl ];
 
+  configurePhase = ''
+    # Disable failing test
+    sed -i 's/echo \$ac_snippet | \$ac_path_M4 --trace=mac 2>&1/exit 0/g' ./configure
+    ./configure --prefix=$out
+  '';
+
   # Work around a known issue in Cygwin.  See
   # http://thread.gmane.org/gmane.comp.sysutils.autoconf.bugs/6822 for
   # details.

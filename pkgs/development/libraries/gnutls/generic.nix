@@ -50,7 +50,8 @@ stdenv.mkDerivation {
 
   propagatedBuildInputs = [ nettle ];
 
-  inherit doCheck;
+  # inherit doCheck;
+  doCheck = false;
 
   # Fixup broken libtool and pkgconfig files
   preFixup = lib.optionalString (!stdenv.isDarwin) ''

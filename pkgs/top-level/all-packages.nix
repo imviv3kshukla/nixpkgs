@@ -170,6 +170,8 @@ in
 
   dockerTools = callPackage ../build-support/docker { };
 
+  dockerExamples = dockerTools.examples;
+
   docker-compose = python3Packages.callPackage ../applications/virtualization/docker-compose {};
 
   docker-ls = callPackage ../tools/misc/docker-ls { };

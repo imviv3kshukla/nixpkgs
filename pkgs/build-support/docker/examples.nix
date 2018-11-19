@@ -7,14 +7,40 @@
 #  $ nix-build '<nixpkgs>' -A dockerTools.examples.redis
 #  $ docker load < result
 
-{ pkgs, buildImage, pullImage, shadowSetup, buildImageWithNixDb }:
+{ pkgs, buildImage, buildImageUnzipped, tarImage, pullImage, shadowSetup, buildImageWithNixDb }:
 
 rec {
   # 1. basic example
-  bash = buildImage {
+  bash = buildImageUnzipped {
     name = "bash";
-    tag = "latest";
+    tag = "docker-test";
     contents = pkgs.bashInteractive;
+  };
+
+  bashZipped = buildImage {
+    name = "bash";
+    tag = "docker-test";
+    contents = pkgs.bashInteractive;
+  };
+
+  bashPlusFile = buildImage {
+    name = "bashPlusFile";
+    tag = "latest";
+
+    # for example's sake, we can layer redis on top of bash or debian
+    fromImage = bash;
+
+    contents = pkgs.file;
+  };
+
+  bashZippedPlusFile = buildImage {
+    name = "bashZippedPlusFile";
+    tag = "latest";
+
+    # for example's sake, we can layer redis on top of bash or debian
+    fromImage = bashZipped;
+
+    contents = pkgs.file;
   };
 
   # 2. service example, layered on another image
@@ -87,8 +113,8 @@ rec {
   # 4. example of pulling an image. could be used as a base for other images
   nixFromDockerHub = pullImage {
     imageName = "nixos/nix";
-    imageDigest = "sha256:20d9485b25ecfd89204e843a962c1bd70e9cc6858d65d7f5fadc340246e2116b";
-    sha256 = "0mqjy3zq2v6rrhizgb9nvhczl87lcfphq9601wcprdika2jz7qh8";
+    imageDigest = "sha256:50ece001fa4ad2a26c85b05c1f1c1285155ed5dffd97d780523526fc36316fb8";
+    sha256 = "05vsbz3kaca87iw59b5sm4nfyn0mp7p3saw3fwcwzjflbfy8qb09";
     finalImageTag = "1.11";
   };
 

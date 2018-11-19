@@ -7,14 +7,40 @@
 #  $ nix-build '<nixpkgs>' -A dockerTools.examples.redis
 #  $ docker load < result
 
-{ pkgs, buildImage, pullImage, shadowSetup, buildImageWithNixDb }:
+{ pkgs, buildImage, buildImageUnzipped, tarImage, pullImage, shadowSetup, buildImageWithNixDb }:
 
 rec {
   # 1. basic example
-  bash = buildImage {
+  bash = buildImageUnzipped {
     name = "bash";
-    tag = "latest";
+    tag = "docker-test";
     contents = pkgs.bashInteractive;
+  };
+
+  bashZipped = buildImage {
+    name = "bash";
+    tag = "docker-test";
+    contents = pkgs.bashInteractive;
+  };
+
+  bashPlusFile = buildImage {
+    name = "bashPlusFile";
+    tag = "latest";
+
+    # for example's sake, we can layer redis on top of bash or debian
+    fromImage = bash;
+
+    contents = pkgs.file;
+  };
+
+  bashZippedPlusFile = buildImage {
+    name = "bashZippedPlusFile";
+    tag = "latest";
+
+    # for example's sake, we can layer redis on top of bash or debian
+    fromImage = bashZipped;
+
+    contents = pkgs.file;
   };
 
   # 2. service example, layered on another image

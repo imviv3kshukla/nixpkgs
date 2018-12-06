@@ -4,6 +4,8 @@
 , postBuild ? ""
 , ignoreCollisions ? false
 , requiredPythonModules, toPythonModule
+, skipNoUserSite ? false
+, requiredPythonModules
 # Wrap executables with the given argument.
 , makeWrapperArgs ? []
 , manylinux1 ? false
@@ -41,7 +43,7 @@ let
             if [ -f "$prg" ]; then
               rm -f "$out/bin/$prg"
               if [ -x "$prg" ]; then
-                makeWrapper "$path/bin/$prg" "$out/bin/$prg" --set PYTHONHOME "$out" --set PYTHONNOUSERSITE "true" ${stdenv.lib.concatStringsSep " " makeWrapperArgs}
+                makeWrapper "$path/bin/$prg" "$out/bin/$prg" --set PYTHONHOME "$out" ${if skipNoUserSite then "" else ''--set PYTHONNOUSERSITE "true"''} ${stdenv.lib.concatStringsSep " " makeWrapperArgs}
               fi
             fi
           done

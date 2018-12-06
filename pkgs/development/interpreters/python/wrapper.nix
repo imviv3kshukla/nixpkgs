@@ -3,6 +3,7 @@
 , extraOutputsToInstall ? []
 , postBuild ? ""
 , ignoreCollisions ? false
+, skipNoUserSite ? false
 , requiredPythonModules
 , }:
 
@@ -32,7 +33,7 @@ let
             if [ -f "$prg" ]; then
               rm -f "$out/bin/$prg"
               if [ -x "$prg" ]; then
-                makeWrapper "$path/bin/$prg" "$out/bin/$prg" --set PYTHONHOME "$out" --set PYTHONNOUSERSITE "true"
+                makeWrapper "$path/bin/$prg" "$out/bin/$prg" --set PYTHONHOME "$out" ${if skipNoUserSite then "" else ''--set PYTHONNOUSERSITE "true"''}
               fi
             fi
           done

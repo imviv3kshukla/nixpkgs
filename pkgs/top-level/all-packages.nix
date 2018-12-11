@@ -21303,6 +21303,8 @@ with pkgs;
     inherit (darwin.apple_sdk.frameworks) Cocoa OpenGL;
   };
 
+  cling = callPackage ../applications/science/misc/root/cling.nix { };
+
   simgrid = callPackage ../applications/science/misc/simgrid { };
 
   spyder = callPackage ../applications/science/spyder { };

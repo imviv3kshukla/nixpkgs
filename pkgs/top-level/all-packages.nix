@@ -22074,6 +22074,8 @@ in
 
   rink = callPackage ../applications/science/misc/rink { };
 
+  cling = callPackage ../applications/science/misc/root/cling.nix { };
+
   simgrid = callPackage ../applications/science/misc/simgrid { };
 
   spyder = callPackage ../applications/science/spyder { };

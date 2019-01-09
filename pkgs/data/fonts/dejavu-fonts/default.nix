@@ -68,7 +68,7 @@ in stdenv.mkDerivation {
   '';
   outputHashAlgo = "sha256";
   outputHashMode = "recursive";
-  outputHash = "15l93xm9mg2ziaxv4nqy2a4jaz54d05xf0hfz1h84bclzb882llh";
+  outputHash = "0c177mgia7abz9sgfhdp65cg18zxxfrdznildqi2qrc12g3p35qf";
   inherit meta;
 
   passthru.minimal = minimal;

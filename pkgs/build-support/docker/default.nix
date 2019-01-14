@@ -188,27 +188,22 @@ rec {
         # Use the name and tag to get the parent ID field.
         parentID=$(jshon -e $fromImageName -e $fromImageTag -u \
                    < image/repositories)
-
-        cat ./image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
-      else
-        touch layer-list
       fi
 
       # Unpack all of the parent layers into the image.
       lowerdir=""
-      extractionID=0
-      for layerTar in $(cat layer-list); do
-        echo "Unpacking layer $layerTar"
-        extractionID=$((extractionID + 1))
+      while [[ -n "$parentID" ]]; do
+        echo "Unpacking layer $parentID"
+        mkdir -p image/$parentID/layer
+        tar -C image/$parentID/layer -xpf image/$parentID/layer.tar
+        rm image/$parentID/layer.tar
 
-        mkdir -p image/$extractionID/layer
-        tar -C image/$extractionID/layer -xpf $layerTar
-        rm $layerTar
-
-        find image/$extractionID/layer -name ".wh.*" -exec bash -c 'name="$(basename {}|sed "s/^.wh.//")"; mknod "$(dirname {})/$name" c 0 0; rm {}' \;
+        find image/$parentID/layer -name ".wh.*" -exec bash -c 'name="$(basename {}|sed "s/^.wh.//")"; mknod "$(dirname {})/$name" c 0 0; rm {}' \;
 
         # Get the next lower directory and continue the loop.
-        lowerdir=$lowerdir''${lowerdir:+:}image/$extractionID/layer
+        lowerdir=$lowerdir''${lowerdir:+:}image/$parentID/layer
+        parentID=$(cat image/$parentID/json \
+                  | (jshon -e parent -u 2>/dev/null || true))
       done
 
       mkdir work
@@ -679,7 +674,6 @@ rec {
           echo "Unpacking base image..."
           tar -C image -xpf "$fromImage"
 
-
           cat ./image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
 
           # Grab the base image config for later
@@ -705,8 +699,6 @@ rec {
           for l in image/*/layer.tar; do
             ls_tar $l >> baseFiles
           done
-        else
-          touch layer-list
         fi
 
         chmod -R ug+rw image
@@ -759,14 +751,6 @@ rec {
         # Use the temp folder we've been working on to create a new image.
         mv temp image/$layerID
 
-        # Add the new layer ID to the beginning of the layer list
-        (
-          # originally this used `sed -i "1i$layerID" layer-list`, but
-          # would fail if layer-list was completely empty.
-          echo "$layerID/layer.tar"
-          cat layer-list
-        ) | ${pkgs.moreutils}/bin/sponge layer-list
-
         # Create image json and image manifest
         # Set the rootfs
         imageJson=$(cat ${baseJson} | jq ". + {\"rootfs\": {\"diff_ids\": [], \"type\": \"layers\"}}")
@@ -777,12 +761,14 @@ rec {
         fi
 
         manifestJson=$(jq -n "[{\"RepoTags\":[\"$imageName:$imageTag\"]}]")
-
-        for layerTar in $(cat ./layer-list); do
-          layerChecksum=$(sha256sum image/$layerTar | cut -d ' ' -f1)
+        currentID=$layerID
+        while [[ -n "$currentID" ]]; do
+          layerChecksum=$(sha256sum image/$currentID/layer.tar | cut -d ' ' -f1)
           imageJson=$(echo "$imageJson" | jq ".history |= [{\"created\": \"$(jq -r .created ${baseJson})\"}] + .")
           imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= [\"sha256:$layerChecksum\"] + .")
-          manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= [\"$layerTar\"] + .")
+          manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= [\"$currentID/layer.tar\"] + .")
+
+          currentID=$(cat image/$currentID/json | (jshon -e parent -u 2>/dev/null || true))
         done
 
         imageJsonChecksum=$(echo "$imageJson" | sha256sum | cut -d ' ' -f1)

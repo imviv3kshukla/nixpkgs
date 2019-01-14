@@ -11,7 +11,7 @@ buildPythonPackage rec {
     owner = "palantir";
     repo = "python-jsonrpc-server";
     rev = version;
-    sha256 = "1xp6xipslw8d1yv05mjmhql07kz04ibci5psjrv6rapqi6jp4bgk";
+    sha256 = "07n2f0k7w5ld1bkfadzjvqr1s9crg6zsxnl5x3qz28jhpw5qaxm0";
   };
 
   checkInputs = [

@@ -2,11 +2,11 @@
 
 buildPythonPackage rec {
   pname = "jedi";
-  version = "0.13.1";
+  version = "0.13.2";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "b7493f73a2febe0dc33d51c99b474547f7f6c0b2c8fb2b21f453eef204c12148";
+    sha256 = "1za944msp0f8x36qa8l309jhv0kzlsdh7r9nj3z12y8npnsh45sp";
   };
 
   postPatch = ''

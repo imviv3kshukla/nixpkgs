@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, python, wget, fetchFromGitHub, cacert, git, cmake, llvm, fetchgit }:
+{ stdenv, fetchurl, python, wget, fetchFromGitHub, cacert, git, cmake, llvm, fetchgit, glibc }:
 
 stdenv.mkDerivation rec {
   name = "cling";
@@ -37,6 +37,8 @@ stdenv.mkDerivation rec {
 
   buildInputs = [python wget cacert git cmake llvm];
 
+  #propagatedBuildInputs = [glibc glibc.dev];
+
   configurePhase = "true";
 
   buildPhase = ''
@@ -51,5 +53,7 @@ stdenv.mkDerivation rec {
     cmake --build . --target install
   '';
 
-  installPhase = "echo asdf";
+  installPhase = ''
+    wrapProgram $out/bin/cling --add-flags "-isystem ${glibc.dev}/include"
+  '';
 }

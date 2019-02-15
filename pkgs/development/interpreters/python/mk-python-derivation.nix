@@ -49,6 +49,10 @@
 # Skip setting the PYTHONNOUSERSITE environment variable in wrapped programs
 , skipNoUserSite ? false
 
+# Enable manylinux1 support in generated binaries, by providing the
+# libraries listed in PEP 513 in LD_LIBRARY_PATH
+, manylinux1 ? false
+
 # Remove bytecode from bin folder.
 # When a Python script has the extension `.py`, bytecode is generated
 # Typically, executables in bin have no extension, so no bytecode is generated.
@@ -70,7 +74,7 @@ then throw "${name} not supported for interpreter ${python.executable}"
 else
 
 let self = toPythonModule (python.stdenv.mkDerivation (builtins.removeAttrs attrs [
-    "disabled" "checkInputs" "doCheck" "doInstallCheck" "dontWrapPythonPrograms" "catchConflicts" "skipNoUserSite"
+    "disabled" "checkInputs" "doCheck" "doInstallCheck" "dontWrapPythonPrograms" "catchConflicts" "skipNoUserSite" "makeWrapperArgs"
   ] // {
 
   name = namePrefix + name;
@@ -99,6 +103,12 @@ let self = toPythonModule (python.stdenv.mkDerivation (builtins.removeAttrs attr
   doCheck = false;
   doInstallCheck = doCheck;
   installCheckInputs = checkInputs;
+
+  makeWrapperArgs = makeWrapperArgs ++ (lib.optionals manylinux1 [
+    "--set"
+    "LD_LIBRARY_PATH"
+    (lib.makeLibraryPath [(lib.callPackage ./manylinux1.nix {}).package])
+  ]);
 
   postFixup = lib.optionalString (!dontWrapPythonPrograms) ''
     ${if skipNoUserSite then "export SKIPNOUSERSITE=1" else ""}

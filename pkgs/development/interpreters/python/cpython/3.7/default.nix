@@ -157,7 +157,7 @@ in stdenv.mkDerivation {
     ln -s "$out/include/python${majorVersion}m" "$out/include/python${majorVersion}"
 
     # Python on Nix is not manylinux1 compatible. https://github.com/NixOS/nixpkgs/issues/18484
-    echo "manylinux1_compatible=False" >> $out/lib/${libPrefix}/_manylinux.py
+    # echo "manylinux1_compatible=False" >> $out/lib/${libPrefix}/_manylinux.py
 
     # Determinism: Windows installers were not deterministic.
     # We're also not interested in building Windows installers.

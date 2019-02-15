@@ -107,7 +107,7 @@ in stdenv.mkDerivation rec {
     $out/bin/pypy -c "import Tkinter;import sqlite3;import curses"
 
     # Python on Nix is not manylinux1 compatible. https://github.com/NixOS/nixpkgs/issues/18484
-    echo "manylinux1_compatible=False" >> $out/lib/${libPrefix}/_manylinux.py
+    # echo "manylinux1_compatible=False" >> $out/lib/${libPrefix}/_manylinux.py
   '';
 
   passthru = let

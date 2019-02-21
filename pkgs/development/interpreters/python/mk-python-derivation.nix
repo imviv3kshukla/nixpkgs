@@ -102,7 +102,7 @@ let self = toPythonModule (python.stdenv.mkDerivation (builtins.removeAttrs attr
   makeWrapperArgs = makeWrapperArgs ++ (lib.optionals manylinux1 [
     "--set"
     "LD_LIBRARY_PATH"
-    (makeLibraryPath [(callPackage ./manylinux1.nix {}).package])
+    (lib.makeLibraryPath [(lib.callPackage ./manylinux1.nix {}).package])
   ]);
 
   postFixup = lib.optionalString (!dontWrapPythonPrograms) ''

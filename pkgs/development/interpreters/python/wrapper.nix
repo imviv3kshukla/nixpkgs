@@ -3,9 +3,8 @@
 , extraOutputsToInstall ? []
 , postBuild ? ""
 , ignoreCollisions ? false
-, requiredPythonModules, toPythonModule
 , skipNoUserSite ? false
-, requiredPythonModules
+, requiredPythonModules, toPythonModule
 # Wrap executables with the given argument.
 , makeWrapperArgs ? []
 , manylinux1 ? false

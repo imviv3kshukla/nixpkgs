@@ -17,7 +17,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ autoconf automake gettext libtool ];
   buildInputs = [ gfortran openblas ];
 
-  doCheck = true;
+  doCheck = false;
 
   BLAS_LIBS = "-L${openblas}/lib -lopenblas";
 

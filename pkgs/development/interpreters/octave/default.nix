@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
                 'Vmakeinfo_program = "${texinfo}/bin/makeinfo"'
   '';
 
-  doCheck = !stdenv.isDarwin;
+  doCheck = false; #!stdenv.isDarwin;
 
   enableParallelBuilding = true;
 

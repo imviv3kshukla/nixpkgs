@@ -158,7 +158,7 @@ rec {
         };
         inherit fromImage fromImageName fromImageTag;
 
-        buildInputs = [ utillinux e2fsprogs jshon rsync jq ];
+        buildInputs = [ utillinux e2fsprogs jshon rsync ];
       } ''
       rm -rf $out
 
@@ -203,8 +203,8 @@ rec {
         extractionID=$((extractionID + 1))
 
         mkdir -p image/$extractionID/layer
-        tar -C image/$extractionID/layer -xpf image/$layerTar
-        rm image/$layerTar
+        tar -C image/$extractionID/layer -xpf $layerTar
+        rm $layerTar
 
         find image/$extractionID/layer -name ".wh.*" -exec bash -c 'name="$(basename {}|sed "s/^.wh.//")"; mknod "$(dirname {})/$name" c 0 0; rm {}' \;
 

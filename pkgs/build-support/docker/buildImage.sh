@@ -99,7 +99,7 @@ mv temp image/$layerID
   # would fail if layer-list was completely empty.
   echo "$layerID/layer.tar"
   cat layer-list
-) | ${moreutils}/bin/sponge layer-list
+) | sponge layer-list
 
 # Create image json and image manifest
 imageJson=$(cat ${baseJson} | jq ". + {\"rootfs\": {\"diff_ids\": [], \"type\": \"layers\"}}")

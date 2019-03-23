@@ -239,10 +239,12 @@ rec {
     # into directories.
     keepContentsDirlinks ? false,
     # Additional commands to run on the layer before it is tar'd up.
-    extraCommands ? "", uid ? 0, gid ? 0
+    extraCommands ? "",
+    # uid and gid to apply to all files in the layer
+    uid ? 0, gid ? 0
   }:
     runCommand "docker-layer-${name}" {
-      inherit baseJson contents extraCommands;
+      inherit baseJson contents extraCommands uid gid;
       buildInputs = [ jshon rsync tarsum ];
       rsyncFlags = ''-a${if keepContentsDirlinks then "K" else "k"}'';
       script = ./mkPureLayer.sh;
@@ -401,7 +403,7 @@ rec {
         # Image name and tag must be lowercase
         imageName = lib.toLower name;
         imageTag = if tag == null then "" else lib.toLower tag;
-        inherit fromImage baseJson;
+        inherit fromImage baseJson layer;
         layerClosure = writeReferencesToFile layer;
         passthru.buildArgs = args;
         passthru.layer = layer;

@@ -18,7 +18,7 @@ fi
 # Tar up the layer and throw it into 'layer.tar'.
 echo "Packing layer..."
 mkdir $out
-tar -C layer --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=${toString uid} --group=${toString gid} -cf $out/layer.tar .
+tar -C layer --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=${uid} --group=${gid} -cf $out/layer.tar .
 
 # Compute a checksum of the tarball.
 echo "Computing layer checksum..."

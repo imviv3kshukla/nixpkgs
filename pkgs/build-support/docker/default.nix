@@ -370,7 +370,7 @@ rec {
     # into directories.
     keepContentsDirlinks ? false,
     # Additional commands to run on the layer before it is tar'd up.
-    extraCommands ? "", uid ? 0, gid ? 0
+    extraCommands ? "",
   }:
     runCommand "docker-layer-${name}" {
       inherit baseJson contents extraCommands;
@@ -397,7 +397,7 @@ rec {
       # Tar up the layer and throw it into 'layer.tar'.
       echo "Packing layer..."
       mkdir $out
-      tar -C layer --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=${toString uid} --group=${toString gid} -cf $out/layer.tar .
+      tar -C layer --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" -cf $out/layer.tar .
 
       # Compute a checksum of the tarball.
       echo "Computing layer checksum..."
@@ -657,7 +657,7 @@ rec {
         if runAsRoot == null
         then mkPureLayer {
           name = baseName;
-          inherit baseJson contents keepContentsDirlinks extraCommands uid gid;
+          inherit baseJson contents keepContentsDirlinks extraCommands;
         } else mkRootLayer {
           name = baseName;
           inherit baseJson fromImage fromImageName fromImageTag

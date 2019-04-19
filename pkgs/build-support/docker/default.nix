@@ -398,7 +398,7 @@ rec {
                   contents keepContentsDirlinks runAsRoot diskSize
                   extraCommands;
         };
-      result = runCommand "docker-image-${baseName}.tar.gz" {
+      result = runCommand "docker-image-${baseName}" {
         buildInputs = [ jshon pigz coreutils findutils jq pkgs.moreutils ];
         # Image name and tag must be lowercase
         imageName = lib.toLower name;

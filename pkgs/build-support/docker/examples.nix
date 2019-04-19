@@ -13,8 +13,18 @@ rec {
   # 1. basic example
   bash = buildImage {
     name = "bash";
-    tag = "latest";
+    tag = "docker-test";
     contents = pkgs.bashInteractive;
+  };
+
+  bashPlusFile = buildImage {
+    name = "bashPlusFile";
+    tag = "latest";
+
+    # for example's sake, we can layer redis on top of bash or debian
+    fromImage = bash;
+
+    contents = pkgs.file;
   };
 
   # 2. service example, layered on another image

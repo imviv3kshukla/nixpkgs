@@ -47,8 +47,8 @@ in
             language = kernel.language;
           }
           // optionalAttrs (kernel ? env) { env = kernel.env; }
-          // optionalAttrs (kernel ? interrupt_mode) { env = kernel.interrupt_mode; }
-          // optionalAttrs (kernel ? metadata) { env = kernel.metadata; }
+          // optionalAttrs (kernel ? interrupt_mode) { interrupt_mode = kernel.interrupt_mode; }
+          // optionalAttrs (kernel ? metadata) { metadata = kernel.metadata; }
           );
           logo32 =
             if (kernel.logo32 != null)

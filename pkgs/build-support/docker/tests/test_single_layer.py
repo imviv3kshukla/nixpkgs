@@ -5,9 +5,24 @@ import subprocess
 
 from util import validate_image
 
+def get_unzipped_image_expression(tag):
+    raw = """
+      with import <nixpkgs> {};
+      with dockerTools;
+      buildImageUnzipped {
+        name = "bash";
+        tag = "%s";
+        contents = pkgs.bashInteractive;
+      }
+      """ % tag
+
+    return raw.strip().replace("\n", " ")
+
 class TestBasic(object):
     def test_single_layer_unzipped(self, tmpdir):
-        subprocess.run(["nix-build", "<nixpkgs>", "-A", "dockerExamples.bash", "-o", "bash"],
+        unzipped_image_expression = get_unzipped_image_expression("random_tag")
+
+        subprocess.run(["nix-build", "-E", unzipped_image_expression, "-o", "bash"],
                        cwd=tmpdir,
                        check=True)
 
@@ -20,8 +35,12 @@ class TestBasic(object):
         assert len(layer_dirs) == 1
 
     def test_single_layer_zipped(self, tmpdir):
+        unzipped_image_expression = get_unzipped_image_expression("random_tag")
+
         # Load the image into Docker and make sure it works
-        subprocess.run(["nix-build", "-E", "with import <nixpkgs> {}; with dockerTools; tarImage { fromImage = dockerExamples.bash; }", "-o", "bashTarred"],
+        subprocess.run(["nix-build", "-E",
+                        "with import <nixpkgs> {}; with dockerTools; tarImage { fromImage = %s; }" % unzipped_image_expression,
+                        "-o", "bashTarred"],
                        cwd=tmpdir,
                        check=True)
 

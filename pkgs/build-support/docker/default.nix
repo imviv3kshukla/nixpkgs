@@ -33,7 +33,7 @@ rec {
   util = (callPackage ./util.nix {});
 
   examples = import ./examples.nix {
-    inherit pkgs buildImage pullImage buildImageWithNixDb;
+    inherit pkgs buildImage buildImageUnzipped tarImage pullImage buildImageWithNixDb;
     inherit (util) shadowSetup;
   };
 

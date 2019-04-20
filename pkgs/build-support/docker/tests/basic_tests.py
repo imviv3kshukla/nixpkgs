@@ -3,16 +3,13 @@ import json
 import os
 import subprocess
 
+from util import validate_image
+
 class TestBasic(object):
-    def test_basic(self, tmpdir):
-
-        print("Got tmpdir: %s" % tmpdir)
-
+    def test_single_layer_unzipped(self, tmpdir):
         subprocess.run(["nix-build", "<nixpkgs>", "-A", "dockerExamples.bash", "-o", "bash"],
                        cwd=tmpdir,
                        check=True)
-
-        subprocess.run(["tree", tmpdir.join("bash")])
 
         image_dir = tmpdir.join("bash").join("image")
         assert os.path.isdir(image_dir)
@@ -22,23 +19,18 @@ class TestBasic(object):
         layer_dirs = next(os.walk(image_dir))[1]
         assert len(layer_dirs) == 1
 
+    def test_single_layer_zipped(self, tmpdir):
         # Load the image into Docker and make sure it works
+        subprocess.run(["nix-build", "-E", "with import <nixpkgs> {}; with dockerTools; tarImage { fromImage = dockerExamples.bash; }", "-o", "bashTarred"],
+                       cwd=tmpdir,
+                       check=True)
 
+        tarball = tmpdir.join("bashTarred").join("image.tar")
 
-        assert 2 == 3
+        subprocess.run(["docker", "load", "--input=" + str(tarball)],
+                       cwd=tmpdir,
+                       check=True)
 
+        output = subprocess.check_output(["docker", "run", "-i", "--rm", "bash", "bash", "-c", "echo -n hi"])
 
-def validate_image(image_dir):
-    """Perform sanity checks to validate that a Docker image folder is well-formed"""
-    manifest_path = image_dir.join("manifest.json")
-
-    assert os.path.isfile(manifest_path)
-
-    with open(manifest_path) as f:
-        manifest = json.loads(f.read())
-
-    for section in manifest:
-        for layer in section["Layers"]:
-            assert os.path.isfile(image_dir.join(layer))
-
-        assert os.path.isfile(image_dir.join(section["Config"]))
+        assert output.decode() == "hi"

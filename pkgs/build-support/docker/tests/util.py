@@ -4,6 +4,8 @@ import os
 
 def validate_image(image_dir):
     """Perform sanity checks to validate that a Docker image folder is well-formed"""
+    assert os.path.isdir(image_dir)
+
     manifest_path = image_dir.join("manifest.json")
 
     assert os.path.isfile(manifest_path)

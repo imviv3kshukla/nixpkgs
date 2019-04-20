@@ -46,9 +46,7 @@ rec {
   buildImageUnzipped = (callPackage ./build-image.nix {}).buildImage;
 
   # buildImage is a synonym for buildImageUnzipped + tarImage
-  buildImage = args: tarImage {
-    fromImage = buildImageUnzipped args;
-  };
+  buildImage = args: tarImage { fromImage = buildImageUnzipped args; };
 
   tarImage = args@{
     fromImage,
@@ -57,7 +55,7 @@ rec {
       fromImage = fromImage;
     } ''
       mkdir -p $out
-      tar -C ${fromImage}/image --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out/image.tar
+      tar -C ${fromImage}/image --dereference --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out/image.tar
     '';
 
   # Build an image and populate its nix database with the provided

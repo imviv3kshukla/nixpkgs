@@ -43,7 +43,22 @@ rec {
 
   exportImage = (callPackage ./export-image.nix {}).exportImage;
 
-  buildImage = (callPackage ./build-image.nix {}).buildImage;
+  buildImageUnzipped = (callPackage ./build-image.nix {}).buildImage;
+
+  # buildImage is a synonym for buildImageUnzipped + tarImage
+  buildImage = args: tarImage {
+    fromImage = buildImageUnzipped args;
+  };
+
+  tarImage = args@{
+    fromImage,
+    }: runCommand "docker-image-tarball" {
+      buildInputs = [pigz];
+      fromImage = fromImage;
+    } ''
+      mkdir -p $out
+      tar -C ${fromImage}/image --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out/image.tar
+    '';
 
   # Build an image and populate its nix database with the provided
   # contents. The main purpose is to be able to use nix commands in

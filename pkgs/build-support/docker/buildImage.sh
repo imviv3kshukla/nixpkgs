@@ -22,15 +22,15 @@ if [[ -n "$fromImage" ]]; then
     echo "Got layer: $baseLayer"
     ln -s $fromImage/image/$baseLayer $out/image/$baseLayer
   done
-
   cp $fromImage/image/repositories $out/image/repositories
+
   # cp -r $fromImage/image/* $out/image
+  # Do not import the base image configuration and manifest
+  chmod a+w $out/image
+  # chmod a+w $out/image/*.json
+  # rm -f $out/image/*.json
 
   cat $fromImage/image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
-
-  # Do not import the base image configuration and manifest
-  chmod a+w $out/image $out/image/*.json
-  rm -f $out/image/*.json
 
   if [[ -z "$fromImageName" ]]; then
     fromImageName=$(jshon -k < $out/image/repositories|head -n1)

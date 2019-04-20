@@ -7,7 +7,8 @@ function teardown() {
 }
 
 function loadImage() {
-    tar -C $1 --hard-dereference --xform s:'^./':: -c . | pigz -nT | docker load
+    tar -C $1 --hard-dereference --xform s:'^./':: -c . | pigz -nT > "${BATS_TEST_NAME}.tar"
+    cat "${BATS_TEST_NAME}.tar" | docker load
 }
 
 @test "builds a container with bash" {

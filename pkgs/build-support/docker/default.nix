@@ -37,7 +37,7 @@ rec {
     inherit (util) shadowSetup;
   };
 
-  pullImage = (callPackage ./pull-image.nix).pullImage;
+  pullImage = (callPackage ./pull-image.nix {}).pullImage;
 
   buildLayeredImage = (callPackage ./layered.nix {}).buildLayeredImage;
 

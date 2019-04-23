@@ -97,7 +97,7 @@ rec {
   # 4. example of pulling an image. could be used as a base for other images
   nixFromDockerHub = pullImage {
     imageName = "nixos/nix";
-    imageDigest = "sha256:20d9485b25ecfd89204e843a962c1bd70e9cc6858d65d7f5fadc340246e2116b";
+    imageDigest = "sha256:50ece001fa4ad2a26c85b05c1f1c1285155ed5dffd97d780523526fc36316fb8";
     sha256 = "0mqjy3zq2v6rrhizgb9nvhczl87lcfphq9601wcprdika2jz7qh8";
     finalImageTag = "1.11";
   };

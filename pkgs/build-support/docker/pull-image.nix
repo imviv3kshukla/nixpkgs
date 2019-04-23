@@ -25,7 +25,8 @@
   writeText,
   closureInfo,
   substituteAll,
-  runtimeShell
+  runtimeShell,
+  curl
 }:
 
 rec {
@@ -41,16 +42,21 @@ rec {
     , arch ? "amd64"
       # This used to set a tag to the pulled image
     , finalImageTag ? "latest"
-    , name ? fixName "docker-image-${imageName}-${finalImageTag}.tar"
+    , name ? fixName "docker-image-${imageName}-${finalImageTag}"
     }:
 
     runCommand name {
       inherit imageName imageDigest;
       imageTag = finalImageTag;
       impureEnvVars = pkgs.stdenv.lib.fetchers.proxyImpureEnvVars;
-      outputHashMode = "flat";
-      outputHashAlgo = "sha256";
-      outputHash = sha256;
+      # impureEnvVars = pkgs.stdenv.lib.fetchers.proxyImpureEnvVars ++ [
+      #   "GIT_PROXY_COMMAND" "SOCKS_SERVER"
+      # ];
+      # outputHashMode = "flat";
+      # outputHashAlgo = "sha256";
+      # outputHash = sha256;
+
+      buildInputs = [curl];
 
       nativeBuildInputs = lib.singleton (pkgs.skopeo);
       SSL_CERT_FILE = "${pkgs.cacert.out}/etc/ssl/certs/ca-bundle.crt";
@@ -58,6 +64,13 @@ rec {
       sourceURL = "docker://${imageName}@${imageDigest}";
       destNameTag = "${imageName}:${finalImageTag}";
     } ''
-      skopeo --override-os ${os} --override-arch ${arch} copy "$sourceURL" "docker-archive://$out:$destNameTag"
+      mkdir -p $out/image
+
+      echo "destNameTag: $destNameTag"
+      echo "Full skopeo command: skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false \"$sourceURL\" \"dir://$out/image\""
+
+      curl https://registry-1.docker.io/v2/
+
+      skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false "$sourceURL" "dir://$out/image"
     '';
 }

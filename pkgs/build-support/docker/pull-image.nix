@@ -52,9 +52,9 @@ rec {
       # impureEnvVars = pkgs.stdenv.lib.fetchers.proxyImpureEnvVars ++ [
       #   "GIT_PROXY_COMMAND" "SOCKS_SERVER"
       # ];
-      # outputHashMode = "flat";
-      # outputHashAlgo = "sha256";
-      # outputHash = sha256;
+      outputHashMode = "recursive";
+      outputHashAlgo = "sha256";
+      outputHash = sha256;
 
       buildInputs = [curl];
 
@@ -68,8 +68,6 @@ rec {
 
       echo "destNameTag: $destNameTag"
       echo "Full skopeo command: skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false \"$sourceURL\" \"dir://$out/image\""
-
-      curl https://registry-1.docker.io/v2/
 
       skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false "$sourceURL" "dir://$out/image"
     '';

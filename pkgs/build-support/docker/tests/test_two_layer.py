@@ -6,7 +6,7 @@ import pathlib
 import pytest
 import subprocess
 
-from util import validate_image
+from util import docker_load, validate_image
 
 def get_unzipped_image_expression(name, tag):
     raw = """
@@ -56,8 +56,7 @@ def test_two_layer_zipped(tmpdir):
     subprocess.run(["nix-build", "-E",
                     "with import <nixpkgs> {}; with dockerTools; tarImage { fromImage = %s; }" % unzipped_image_expression,
                     "-o", "output"],
-                   cwd=tmpdir,
-                   check=True)
+                   cwd=tmpdir, check=True)
 
     tarball = tmpdir.join("output")
 
@@ -75,10 +74,7 @@ def test_two_layer_zipped(tmpdir):
 
     # Make sure the image can be loaded into Docker
     full_image_name = image_name + ":" + tag_name
-    try:
-        subprocess.run(["docker", "load", "--input=" + str(tarball)], cwd=tmpdir, check=True)
-        output = subprocess.check_output(["docker", "run", "-i", "--rm", full_image_name, "bash", "-c", "echo hi > some_file; file some_file"])
+    with docker_load(full_image_name, tarball):
+        output = subprocess.check_output(["docker", "run", "-i", "--rm", full_image_name,
+                                          "bash", "-c", "echo hi > some_file; file some_file"])
         assert output.decode().strip() == "some_file: ASCII text"
-    finally:
-        client = docker.from_env()
-        client.images.remove(image=full_image_name, force=True)

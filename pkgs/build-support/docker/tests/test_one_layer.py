@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 
-from util import validate_image
+from util import docker_load, validate_image
 
 def get_unzipped_image_expression(name, tag):
     raw = """
@@ -39,16 +39,11 @@ def test_one_layer_zipped(tmpdir):
     subprocess.run(["nix-build", "-E",
                     "with import <nixpkgs> {}; with dockerTools; tarImage { fromImage = %s; }" % unzipped_image_expression,
                     "-o", "bashTarred"],
-                   cwd=tmpdir,
-                   check=True)
+                   cwd=tmpdir, check=True)
 
     tarball = tmpdir.join("bashTarred")
-
     full_image_name = image_name + ":" + image_tag
-    try:
-        subprocess.run(["docker", "load", "--input=" + str(tarball)], cwd=tmpdir, check=True)
-        output = subprocess.check_output(["docker", "run", "-i", "--rm", full_image_name, "bash", "-c", "echo -n hi"])
+    with docker_load(full_image_name, tarball):
+        output = subprocess.check_output(["docker", "run", "-i", "--rm", full_image_name,
+                                          "bash", "-c", "echo -n hi"])
         assert output.decode() == "hi"
-    finally:
-        client = docker.from_env()
-        client.images.remove(image=full_image_name, force=True)

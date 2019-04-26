@@ -111,6 +111,7 @@ rec {
 
           imageTag=$outHash
         '';
+        utilSource = ./util.sh;
         script = ./buildImage.sh;
       } "source $script";
 

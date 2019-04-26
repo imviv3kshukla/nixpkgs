@@ -42,7 +42,7 @@ class TestBasic(object):
                        cwd=tmpdir,
                        check=True)
 
-        tarball = tmpdir.join("bashTarred").join("image.tar")
+        tarball = tmpdir.join("bashTarred")
 
         full_image_name = image_name + ":" + image_tag
         try:

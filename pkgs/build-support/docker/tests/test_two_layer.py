@@ -59,7 +59,7 @@ def test_two_layer_zipped(tmpdir):
                    cwd=tmpdir,
                    check=True)
 
-    tarball = tmpdir.join("output").join("image.tar")
+    tarball = tmpdir.join("output")
 
     # Extract the tarball into a temp folder and make sure it looks good
     examine_folder = tmpdir.join("examine_tarball")

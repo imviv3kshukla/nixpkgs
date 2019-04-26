@@ -50,12 +50,11 @@ rec {
 
   tarImage = args@{
     fromImage,
-    }: runCommand "docker-image-tarball" {
+    }: runCommand "docker-image.tar.gz" {
       buildInputs = [pigz];
       fromImage = fromImage;
     } ''
-      mkdir -p $out
-      tar -C ${fromImage}/image --dereference --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out/image.tar
+      tar -C ${fromImage}/image --dereference --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out
     '';
 
   # Build an image and populate its nix database with the provided

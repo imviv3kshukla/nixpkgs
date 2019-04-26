@@ -24,11 +24,7 @@ if [[ -n "$fromImage" ]]; then
   done
   cp $fromImage/image/repositories $out/image/repositories
 
-  # cp -r $fromImage/image/* $out/image
-  # Do not import the base image configuration and manifest
   chmod a+w $out/image
-  # chmod a+w $out/image/*.json
-  # rm -f $out/image/*.json
 
   cat $fromImage/image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
 
@@ -36,11 +32,9 @@ if [[ -n "$fromImage" ]]; then
     fromImageName=$(jshon -k < $out/image/repositories|head -n1)
   fi
   if [[ -z "$fromImageTag" ]]; then
-    fromImageTag=$(jshon -e $fromImageName -k \
-                         < $out/image/repositories|head -n1)
+    fromImageTag=$(jshon -e $fromImageName -k < $out/image/repositories | head -n1)
   fi
-  parentID=$(jshon -e $fromImageName -e $fromImageTag -u \
-                   < $out/image/repositories)
+  parentID=$(jshon -e $fromImageName -e $fromImageTag -u < $out/image/repositories)
 
   echo "Gathering base files"
   for l in $out/image/*/layer.tar; do

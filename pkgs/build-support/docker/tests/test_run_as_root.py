@@ -13,7 +13,7 @@ def get_unzipped_image_expression(name, tag):
       buildImageUnzipped {
         name = "%s";
         tag = "%s";
-        contents = pkgs.bashInteractive;
+        contents = [pkgs.bashInteractive pkgs.coreutils];
         runAsRoot = "mkdir -p /data; echo hello > /data/hello.txt";
       }
       """ % (name, tag)
@@ -44,7 +44,7 @@ def test_one_layer_zipped(tmpdir):
 
     tarball = tmpdir.join("bashTarred")
     full_image_name = image_name + ":" + image_tag
-    with docker_load(full_image_name):
+    with docker_load(full_image_name, tarball):
         output = subprocess.check_output(["docker", "run", "-i", "--rm", full_image_name,
-                                          "bash", "-c", "echo -n hi"])
-        assert output.decode() == "hi"
+                                          "bash", "-c", "cat /data/hello.txt"])
+        assert output.decode() == "hello\n"

@@ -114,7 +114,7 @@ rec {
   nixFromDockerHub = pullImage {
     imageName = "nixos/nix";
     imageDigest = "sha256:50ece001fa4ad2a26c85b05c1f1c1285155ed5dffd97d780523526fc36316fb8";
-    sha256 = "0kvks3iyaivhg8kwnpygzashrp6kylr8dfczgwid7av8aybpxxqb";
+    sha256 = "05vsbz3kaca87iw59b5sm4nfyn0mp7p3saw3fwcwzjflbfy8qb09";
     finalImageTag = "1.11";
   };
 

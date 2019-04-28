@@ -64,11 +64,10 @@ rec {
       sourceURL = "docker://${imageName}@${imageDigest}";
       destNameTag = "${imageName}:${finalImageTag}";
     } ''
-      mkdir -p $out/image
+      mkdir -p $out
+      skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false "$sourceURL" "docker-archive://$out/image.tar:$destNameTag"
 
-      echo "destNameTag: $destNameTag"
-      echo "Full skopeo command: skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false \"$sourceURL\" \"dir://$out/image\""
-
-      skopeo --override-os ${os} --override-arch ${arch} copy --dest-compress=false "$sourceURL" "dir://$out/image"
+      tar -C $out -xvf $out/image.tar
+      rm $out/image.tar
     '';
 }

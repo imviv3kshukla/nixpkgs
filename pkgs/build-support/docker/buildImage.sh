@@ -1,29 +1,32 @@
 
 eval "$initialCommand"
 
-echo "Util source: $utilSource"
 . "$utilSource"
 
-mkdir -p $out/image
+mkdir -p $out
 touch baseFiles
 touch layer-list
 if [[ -n "$fromImage" ]]; then
-  if [[ -d "$fromImage/image" ]]; then
+  if [[ -d "$fromImage" ]]; then
+    cat $fromImage/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
+
     echo "Linking base image layers ($fromImage)"
-    for baseLayer in $(find $fromImage/image/ ! -path $fromImage/image/ -maxdepth 1 -type d -exec basename {} \;); do
+    for baseLayer in $(cat layer-list); do
       echo "Got layer: $baseLayer"
-      ln -s $fromImage/image/$baseLayer $out/image/$baseLayer
+      if [[ -n "$(dirname $baseLayer)" ]]; then mkdir -p $out/$(dirname $baseLayer); fi
+      ln -s $fromImage/$baseLayer $out/$baseLayer
     done
 
-    cp $fromImage/image/repositories $out/image/repositories
-    cat $fromImage/image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
+    cp $fromImage/repositories $out/repositories
+
+    cat $fromImage/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
 
   elif [[ -f "$fromImage" ]]; then
     echo "Copying base image layers ($fromImage)"
     mkdir -p from_image_unpacked
-    tar -C $out/image -xpf "$fromImage"
+    tar -C $out -xpf "$fromImage"
 
-    cat $out/image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
+    cat $out/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
 
     # Do not import the base image configuration and manifest
     rm -f image/*.json
@@ -32,19 +35,19 @@ if [[ -n "$fromImage" ]]; then
     exit 1
   fi
 
-  chmod a+w $out/image
+  chmod a+w $out
 
-  if [[ -z "$fromImageName" ]]; then fromImageName=$(jshon -k < $out/image/repositories|head -n1); fi
-  if [[ -z "$fromImageTag" ]]; then fromImageTag=$(jshon -e $fromImageName -k < $out/image/repositories | head -n1); fi
-  parentID=$(jshon -e $fromImageName -e $fromImageTag -u < $out/image/repositories)
+  if [[ -z "$fromImageName" ]]; then fromImageName=$(jshon -k < $out/repositories|head -n1); fi
+  if [[ -z "$fromImageTag" ]]; then fromImageTag=$(jshon -e $fromImageName -k < $out/repositories | head -n1); fi
+  parentID=$(jshon -e $fromImageName -e $fromImageTag -u < $out/repositories)
 
   echo "Gathering base files"
-  for l in $out/image/*/layer.tar; do
+  for l in $out/*/layer.tar; do
     ls_tar $l >> baseFiles
   done
 fi
 
-chmod -R ug+rw $out/image
+chmod -R ug+rw $out
 
 mkdir temp
 cp ${layer}/* temp/
@@ -92,7 +95,7 @@ cat temp/json | jshon -s "$layerID" -i id -n $size -i Size > tmpjson
 mv tmpjson temp/json
 
 # Use the temp folder we've been working on to create a new image.
-mv temp $out/image/$layerID
+mv temp $out/$layerID
 
 # Add the new layer ID to the beginning of the layer list
 (
@@ -108,23 +111,23 @@ manifestJson=$(jq -n "[{\"RepoTags\":[\"$imageName:$imageTag\"]}]")
 
 for layerTar in $(tac ./layer-list); do
   echo "Summing layer $layerTar"
-  layerChecksum=$(sha256sum $out/image/$layerTar | cut -d ' ' -f1)
+  layerChecksum=$(sha256sum $out/$layerTar | cut -d ' ' -f1)
   imageJson=$(echo "$imageJson" | jq ".history |= [{\"created\": \"$(jq -r .created ${baseJson})\"}] + .")
   imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= [\"sha256:$layerChecksum\"] + .")
   manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= [\"$layerTar\"] + .")
 done
 
 imageJsonChecksum=$(echo "$imageJson" | sha256sum | cut -d ' ' -f1)
-echo "$imageJson" > "$out/image/$imageJsonChecksum.json"
+echo "$imageJson" > "$out/$imageJsonChecksum.json"
 manifestJson=$(echo "$manifestJson" | jq ".[0].Config = \"$imageJsonChecksum.json\"")
-echo "$manifestJson" > $out/image/manifest.json
+echo "$manifestJson" > $out/manifest.json
 
 # Store the json under the name image/repositories.
 jshon -n object \
       -n object -s "$layerID" -i "$imageTag" \
-      -i "$imageName" > $out/image/repositories
+      -i "$imageName" > $out/repositories
 
 # Make the image read-only.
-chmod -R a-w $out/image
+chmod -R a-w $out
 
 echo "Finished."

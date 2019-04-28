@@ -54,7 +54,7 @@ rec {
       buildInputs = [pigz];
       fromImage = fromImage;
     } ''
-      tar -C ${fromImage}/image --dereference --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out
+      tar -C ${fromImage} --dereference --hard-dereference --xform s:'^./':: -c . | pigz -nT > $out
     '';
 
   # Build an image and populate its nix database with the provided

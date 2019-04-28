@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 
-def validate_image(image_dir, num_layers=None, num_symlink_layers=None):
+def validate_image(image_dir, num_layers=None, num_symlink_layers=None, check_sha256=False):
     """Perform sanity checks to validate that a Docker image folder is well-formed"""
     assert os.path.isdir(image_dir)
 
@@ -30,6 +30,8 @@ def validate_image(image_dir, num_layers=None, num_symlink_layers=None):
     if num_symlink_layers is not None:
         assert len([x for x in layer_dirs if os.path.islink(x)]) == num_symlink_layers
 
+    if check_sha256:
+        raise Exception("TODO: implement checking of the layers using sha256sum")
 
 @contextmanager
 def docker_load(full_image_name, tarball):

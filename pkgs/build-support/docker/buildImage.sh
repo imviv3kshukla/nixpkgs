@@ -21,7 +21,7 @@ if [[ -n "$fromImage" ]]; then
 
     cat $fromImage/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
     fromImageManifest=$(cat $fromImage/manifest.json)
-    fromImageConfig=$(cat $fromImage/manifest.json | jq ".[0].Config")
+    fromImageConfig=$(cat $fromImage/$(cat $fromImage/manifest.json | jq -r ".[0].Config"))
 
   elif [[ -f "$fromImage" ]]; then
     echo "Copying base image layers ($fromImage)"
@@ -30,7 +30,7 @@ if [[ -n "$fromImage" ]]; then
 
     cat $out/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
     fromImageManifest=$(cat $out/manifest.json)
-    fromImageConfig=$(cat $out/manifest.json | jq ".[0].Config")
+    fromImageConfig=$(cat $out/$(cat $out/manifest.json | jq -r ".[0].Config"))
 
     # Do not import the base image configuration and manifest
     rm -f image/*.json
@@ -110,28 +110,30 @@ mv temp $out/$layerID
 ) | sponge layer-list
 
 # Create image json and image manifest
-if [[ -n "fromImage" ]]; then
-  imageJson=$(cat $baseJson)
+if [[ -n "$fromImage" ]]; then
+  imageJson=$(echo $fromImageConfig)
+
+  baseJsonContents=$(cat $baseJson)
 
   # Merge the config specified for this layer with the config from the base image.
 
   # For Env variables, we append them to the base image
-  newEnv=$(echo $baseJson | jq ".config.Env")
+  newEnv=$(echo "$baseJsonContents" | jq ".config.Env")
   if [[ -n "$newEnv" ]]; then
-    imageJson=$(echo "$imageJson" | jq ".Env |= . + ${newEnv}")
+    imageJson=$(echo "$imageJson" | jq ".config.Env |= . + ${newEnv}")
   fi
 
   # Volumes likewise get added to existing volumes
-  newVolumes=$(echo $baseJson | jq ".config.Volumes")
-  if [[ -n "$newEnv" ]]; then
-    imageJson=$(echo "$imageJson" | jq ".Volumes |= . + ${newVolumes}")
+  newVolumes=$(echo $baseJsonContents | jq ".config.Volumes")
+  if [[ -n "$newVolumes" ]]; then
+    imageJson=$(echo "$imageJson" | jq ".config.Volumes |= . + ${newVolumes}")
   fi
 
   # All other values overwrite the ones from the base config
-  remainingBaseConfig=$(echo "$imageJson" | jq "del(.Env) | del(.Volumes)")
-  imageJson=$(echo "$imageJson" | jq ". + ${remainingBaseConfig}")
+  remainingBaseConfig=$(echo "$baseJsonContents" | jq ".config | del(.Env) | del(.Volumes)")
+  imageJson=$(echo "$imageJson" | jq ".config |= . + ${remainingBaseConfig}")
 
-  manifestJson=$(echo "$fromImageManifest" | jq ". + {\"RepoTags\":[\"$imageName:$imageTag\"]}")
+  manifestJson=$(echo "$fromImageManifest" | jq ".[0] |= . + {\"RepoTags\":[\"$imageName:$imageTag\"]}")
 else
   imageJson=$(cat ${baseJson} | jq ". + {\"rootfs\": {\"diff_ids\": [], \"type\": \"layers\"}}")
   manifestJson=$(jq -n "[{\"RepoTags\":[\"$imageName:$imageTag\"]}]")
@@ -139,8 +141,8 @@ fi
 
 # Add a history item and new layer checksum to the image json
 imageJson=$(echo "$imageJson" | jq ".history |= [{\"created\": \"$(jq -r .created ${baseJson})\"}] + .")
-newLayerChecksum=$(sha256sum $out/$layerTar | cut -d ' ' -f1)
-imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= [\"sha256:$layerChecksum\"] + .")
+newLayerChecksum=$(sha256sum $out/$layerID/layer.tar | cut -d ' ' -f1)
+imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= [\"sha256:$newLayerChecksum\"] + .")
 
 # Add the new layer to the image manifest
 manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= [\"$layerID/layer.tar\"] + .")

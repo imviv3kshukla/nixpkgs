@@ -33,10 +33,9 @@ def test_docker_load(tmpdir):
     image_tag = "bash_tag"
     unzipped_image_expression = get_unzipped_image_expression(image_name, image_tag)
 
-    tarball = tar_image(unzipped_image_expression, tmpdir)
     full_image_name = image_name + ":" + image_tag
 
-    with docker_load(full_image_name, tarball):
+    with docker_load(full_image_name, tar_image(unzipped_image_expression, tmpdir)):
         # Test working dir is set correctly
         assert docker_command(full_image_name, "pwd") == "/data\n"
 

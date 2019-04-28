@@ -1,4 +1,6 @@
 
+import subprocess
+
 from util import *
 
 def get_unzipped_image_expression(name, tag):
@@ -8,7 +10,15 @@ def get_unzipped_image_expression(name, tag):
       buildImageUnzipped {
         name = "%s";
         tag = "%s";
-        contents = pkgs.bashInteractive;
+        contents = [pkgs.bashInteractive pkgs.coreutils];
+        config = {
+          Cmd = [ "ls" "-lh" "/data" ];
+          WorkingDir = "/data";
+          Env = ["FOO=BAR"];
+          Volumes = {
+            "/data" = {};
+          };
+        };
       }
       """ % (name, tag)
 
@@ -25,5 +35,13 @@ def test_docker_load(tmpdir):
 
     tarball = tar_image(unzipped_image_expression, tmpdir)
     full_image_name = image_name + ":" + image_tag
+
     with docker_load(full_image_name, tarball):
-        assert docker_command(full_image_name, "echo -n hi") == "hi"
+        # Test working dir is set correctly
+        assert docker_command(full_image_name, "pwd") == "/data\n"
+
+        # Test environment variable is set
+        assert docker_command(full_image_name, "echo $FOO") == "BAR\n"
+
+        # Test default command is run
+        assert subprocess.check_output(["docker", "run", "-i", "--rm", full_image_name]).decode() == "total 0\n"

@@ -22,7 +22,6 @@ if [[ -n "$fromImage" ]]; then
     cat $fromImage/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
     fromImageManifest=$(cat $fromImage/manifest.json)
     fromImageConfig=$(cat $fromImage/$(cat $fromImage/manifest.json | jq -r ".[0].Config"))
-
   elif [[ -f "$fromImage" ]]; then
     echo "Copying base image layers ($fromImage)"
     mkdir -p from_image_unpacked
@@ -61,7 +60,6 @@ for dep in $(cat $layerClosure); do
   find $dep >> layerFiles
 done
 
-echo "Adding layer..."
 # Record the contents of the tarball with ls_tar.
 ls_tar temp/layer.tar >> baseFiles
 
@@ -111,27 +109,28 @@ mv temp $out/$layerID
 
 # Create image json and image manifest
 if [[ -n "$fromImage" ]]; then
-  imageJson=$(echo $fromImageConfig)
-
+  imageJson=$fromImageConfig
   baseJsonContents=$(cat $baseJson)
 
   # Merge the config specified for this layer with the config from the base image.
 
   # For Env variables, we append them to the base image
   newEnv=$(echo "$baseJsonContents" | jq ".config.Env")
-  if [[ -n "$newEnv" ]]; then
+  if [[ -n "$newEnv" && ("$newEnv" != "null") ]]; then
     imageJson=$(echo "$imageJson" | jq ".config.Env |= . + ${newEnv}")
   fi
 
   # Volumes likewise get added to existing volumes
   newVolumes=$(echo $baseJsonContents | jq ".config.Volumes")
-  if [[ -n "$newVolumes" ]]; then
+  if [[ -n "$newVolumes" && ("$newVolumes" != "null") ]]; then
     imageJson=$(echo "$imageJson" | jq ".config.Volumes |= . + ${newVolumes}")
   fi
 
   # All other values overwrite the ones from the base config
   remainingBaseConfig=$(echo "$baseJsonContents" | jq ".config | del(.Env) | del(.Volumes)")
-  imageJson=$(echo "$imageJson" | jq ".config |= . + ${remainingBaseConfig}")
+  if [[ -n "$remainingBaseConfig" && ("$remainingBaseConfig" != "null")]]; then
+    imageJson=$(echo "$imageJson" | jq ".config.Volumes |= . + ${remainingBaseConfig}")
+  fi
 
   manifestJson=$(echo "$fromImageManifest" | jq ".[0] |= . + {\"RepoTags\":[\"$imageName:$imageTag\"]}")
 else

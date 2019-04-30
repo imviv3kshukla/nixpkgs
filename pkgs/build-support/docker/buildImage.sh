@@ -139,7 +139,7 @@ else
 fi
 
 # Add a history item and new layer checksum to the image json
-imageJson=$(echo "$imageJson" | jq ".history |= [{\"created\": \"$(jq -r .created ${baseJson})\"}] + .")
+imageJson=$(echo "$imageJson" | jq ".history |= [{\"created\": \"$(jq -r .created ${baseJson})\", \"created_by\": \"$imageName:$imageTag\"}] + .")
 newLayerChecksum=$(sha256sum $out/$layerID/layer.tar | cut -d ' ' -f1)
 imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= [\"sha256:$newLayerChecksum\"] + .")
 

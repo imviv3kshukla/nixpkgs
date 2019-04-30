@@ -112,7 +112,7 @@ rec {
           imageTag=$outHash
         '';
         utilSource = ./util.sh;
-        script = ./buildImage.sh;
+        script = ./build-image.sh;
       } "source $script";
 
     in
@@ -139,7 +139,7 @@ rec {
       inherit baseJson contents extraCommands uid gid;
       buildInputs = [ jshon rsync tarsum ];
       rsyncFlags = ''-a${if keepContentsDirlinks then "K" else "k"}'';
-      script = ./mkPureLayer.sh;
+      script = ./mk-pure-layer.sh;
     } "source $script";
 
   # Make a "root" layer; required if we need to execute commands as a

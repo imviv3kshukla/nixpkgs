@@ -12,7 +12,6 @@ if [[ -n "$fromImage" ]]; then
 
     echo "Linking base image layers ($fromImage)"
     for baseLayer in $(cat layer-list); do
-      echo "Got layer: $baseLayer"
       if [[ -n "$(dirname $baseLayer)" ]]; then mkdir -p $out/$(dirname $baseLayer); fi
       ln -s $fromImage/$baseLayer $out/$baseLayer
     done
@@ -139,12 +138,12 @@ else
 fi
 
 # Add a history item and new layer checksum to the image json
-imageJson=$(echo "$imageJson" | jq ".history |= [{\"created\": \"$(jq -r .created ${baseJson})\", \"created_by\": \"$imageName:$imageTag\"}] + .")
+imageJson=$(echo "$imageJson" | jq ".history |= . + [{\"created\": \"$(jq -r .created ${baseJson})\", \"created_by\": \"$imageName:$imageTag\"}]")
 newLayerChecksum=$(sha256sum $out/$layerID/layer.tar | cut -d ' ' -f1)
-imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= [\"sha256:$newLayerChecksum\"] + .")
+imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= . + [\"sha256:$newLayerChecksum\"]")
 
 # Add the new layer to the image manifest
-manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= [\"$layerID/layer.tar\"] + .")
+manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= . + [\"$layerID/layer.tar\"]")
 
 # Compute the checksum of the config and save it, and also put it in the manifest
 imageJsonChecksum=$(echo "$imageJson" | sha256sum | cut -d ' ' -f1)

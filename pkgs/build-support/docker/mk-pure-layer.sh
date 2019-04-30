@@ -18,7 +18,7 @@ fi
 # Tar up the layer and throw it into 'layer.tar'.
 echo "Packing layer..."
 mkdir $out
-tar -C layer --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" -cf $out/layer.tar .
+tar -C layer --hard-dereference --xform s:'^./':: --sort=name --mtime="@$SOURCE_DATE_EPOCH" -cf $out/layer.tar .
 
 # Compute a checksum of the tarball.
 echo "Computing layer checksum..."

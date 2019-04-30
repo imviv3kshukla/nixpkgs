@@ -129,7 +129,7 @@ if [[ -n "$fromImage" ]]; then
   # All other values overwrite the ones from the base config
   remainingBaseConfig=$(echo "$baseJsonContents" | jq ".config | del(.Env) | del(.Volumes)")
   if [[ -n "$remainingBaseConfig" && ("$remainingBaseConfig" != "null")]]; then
-    imageJson=$(echo "$imageJson" | jq ".config.Volumes |= . + ${remainingBaseConfig}")
+    imageJson=$(echo "$imageJson" | jq ".config |= . + ${remainingBaseConfig}")
   fi
 
   manifestJson=$(echo "$fromImageManifest" | jq ".[0] |= . + {\"RepoTags\":[\"$imageName:$imageTag\"]}")

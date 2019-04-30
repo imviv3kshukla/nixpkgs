@@ -24,13 +24,14 @@ def get_unzipped_image_expression(name, tag):
 
     return raw.strip().replace("\n", " ")
 
+image_name = "config_image_name"
+image_tag = "config_image_tag"
+
 def test_one_layer_unzipped(tmpdir):
-    validate_image(build_unzipped(get_unzipped_image_expression("some_image_name", "some_tag"), tmpdir),
+    validate_image(build_unzipped(get_unzipped_image_expression(image_name, image_tag), tmpdir),
                    num_layers=1, num_symlink_layers=0)
 
 def test_docker_load(tmpdir):
-    image_name = "bash_image"
-    image_tag = "bash_tag"
     unzipped_image_expression = get_unzipped_image_expression(image_name, image_tag)
 
     full_image_name = image_name + ":" + image_tag

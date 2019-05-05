@@ -39,7 +39,7 @@ rec {
 
   pullImage = (callPackage ./pull-image.nix {}).pullImage;
 
-  buildLayeredImage = (callPackage ./layered.nix {}).buildLayeredImage;
+  buildLayeredImage = (callPackage ./build-layered-image.nix {}).buildLayeredImage;
 
   exportImage = (callPackage ./export-image.nix {}).exportImage;
 

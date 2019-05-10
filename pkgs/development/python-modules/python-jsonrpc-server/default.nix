@@ -14,6 +14,10 @@ buildPythonPackage rec {
     sha256 = "0k55rpywghapk5db8dgp2jj5v5654q6m571s1gcz1mpn2qxkz69l";
   };
 
+  postPatch = ''
+    sed -i 's/version=versioneer.get_version(),/version="${version}",/g' setup.py
+  '';
+
   checkInputs = [
     pytest mock pytestcov coverage
   ];

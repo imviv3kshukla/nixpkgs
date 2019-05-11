@@ -1,6 +1,7 @@
 { stdenv, buildPythonPackage, fetchFromGitHub, pythonOlder, isPy27
 , configparser, futures, future, jedi, pluggy, python-jsonrpc-server
 , pytest, mock, pytestcov, coverage
+, backports_functools_lru_cache
 , # Allow building a limited set of providers, e.g. ["pycodestyle"].
   providers ? ["*"]
   # The following packages are optional and
@@ -52,7 +53,8 @@ buildPythonPackage rec {
     ++ stdenv.lib.optional (withProvider "rope") rope
     ++ stdenv.lib.optional (withProvider "yapf") yapf
     ++ stdenv.lib.optional isPy27 configparser
-    ++ stdenv.lib.optional (pythonOlder "3.2") futures;
+    ++ stdenv.lib.optional (pythonOlder "3.2") futures
+    ++ stdenv.lib.optional (pythonOlder "3.2") backports_functools_lru_cache;
 
   meta = with stdenv.lib; {
     homepage = https://github.com/palantir/python-language-server;

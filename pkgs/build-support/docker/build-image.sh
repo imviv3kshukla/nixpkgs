@@ -15,6 +15,12 @@ if [[ -n "$fromImage" ]]; then
       echo "Got layer: $baseLayer"
       if [[ -n "$(dirname $baseLayer)" ]]; then mkdir -p $out/$(dirname $baseLayer); fi
       ln -s $fromImage/$baseLayer $out/$baseLayer
+
+      # Also link the json and VERSION files if present
+      jsonFile=$(dirname $baseLayer)/json
+      if [ -f "$fromImage/$jsonFile" ]; then ln -s $fromImage/$jsonFile $out/$jsonFile; fi
+      versionFile=$(dirname $baseLayer)/VERSION
+      if [ -f "$fromImage/$versionFile" ]; then ln -s $fromImage/$versionFile $out/$versionFile; fi
     done
 
     cp $fromImage/repositories $out/repositories

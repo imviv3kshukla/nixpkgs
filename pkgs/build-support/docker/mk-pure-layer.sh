@@ -3,7 +3,14 @@ if [[ -n "$contents" ]]; then
   echo "Adding contents..."
   for item in $contents; do
     echo "Adding $item"
-    rsync $rsyncFlags --chown=${uid}:${gid} $item/ layer/
+    rsync $rsyncFlags -R --chown=${uid}:${gid} $item/ layer/
+
+    # For every executable file in the contents, add a symlink in /bin/
+    if [ -d $item/bin ]; then
+        mkdir -p layer/bin
+        current_dir=$(pwd)
+        find $item/bin -executable -execdir ln -s $item/bin/{} $current_dir/layer/bin/{} \;
+    fi
   done
 else
   echo "No contents to add to layer."

@@ -90,6 +90,7 @@ in rec {
   cpu = mkDerivation {
     pluginName = "cpu";
     version = "unstable-2020-04-05";
+    propagatedBuildInputs = [pkgs.sysstat];
     src = fetchFromGitHub {
       owner = "tmux-plugins";
       repo = "tmux-cpu";

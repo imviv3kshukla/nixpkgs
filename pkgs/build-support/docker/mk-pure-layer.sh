@@ -9,7 +9,9 @@ if [[ -n "$contents" ]]; then
     if [ -d $item/bin ]; then
         mkdir -p layer/bin
         current_dir=$(pwd)
-        find $item/bin -executable -execdir ln -s $item/bin/{} $current_dir/layer/bin/{} \;
+        # Note the -mindepth 1 test, which ensure we don't get the $item/bin directory
+        # (since directories can be executable)
+        find $item/bin -mindepth 1 -executable -execdir ln -s $item/bin/{} $current_dir/layer/bin/{} \;
     fi
   done
 else

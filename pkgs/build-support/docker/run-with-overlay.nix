@@ -70,14 +70,12 @@ rec {
         # If the tag isn't set, use the name as an index into the json
         # and read the first key found.
         if [[ -z "$fromImageTag" ]]; then
-          fromImageTag=$(jshon -e $fromImageName -k < image/repositories \
-                         | head -n1)
+          fromImageTag=$(jshon -e $fromImageName -k < image/repositories | head -n1)
           echo "From-image tag wasn't set. Read $fromImageTag."
         fi
 
         # Use the name and tag to get the parent ID field.
-        parentID=$(jshon -e $fromImageName -e $fromImageTag -u \
-                   < image/repositories)
+        parentID=$(jshon -e $fromImageName -e $fromImageTag -u < image/repositories)
 
         cat ./image/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list
       else

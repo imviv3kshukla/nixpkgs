@@ -29,7 +29,6 @@ if [[ -n "$fromImage" ]]; then
     fromImageConfig=$(cat $fromImage/$(cat $fromImage/manifest.json | jq -r ".[0].Config"))
   elif [[ -f "$fromImage" ]]; then
     echo "Copying base image layers ($fromImage)"
-    mkdir -p from_image_unpacked
     tar -C $out -xpf "$fromImage"
 
     cat $out/manifest.json  | jq -r '.[0].Layers | .[]' > layer-list

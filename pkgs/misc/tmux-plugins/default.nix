@@ -83,6 +83,7 @@ in rec {
 
   cpu = mkDerivation {
     pluginName = "cpu";
+    propagatedBuildInputs = [pkgs.sysstat];
     src = fetchgit {
       url = "https://github.com/tmux-plugins/tmux-cpu";
       rev = "12f7a74e25bf59701456e2c0d98b39bb19ec7039";

@@ -48,10 +48,12 @@ if [[ -n "$fromImage" ]]; then
   if [[ -z "$fromImageTag" ]]; then fromImageTag=$(jshon -e $fromImageName -k < $out/repositories | head -n1); fi
   parentID=$(jshon -e $fromImageName -e $fromImageTag -u < $out/repositories)
 
-  echo "Gathering base files"
+  echo -n "Gathering base files"
+  start_time
   for l in $out/*/layer.tar; do
     ls_tar $l >> baseFiles
   done
+  end_time
 fi
 
 chmod -R ug+rw $out
@@ -67,18 +69,19 @@ done
 # Record the contents of the tarball with ls_tar.
 ls_tar temp/layer.tar >> baseFiles
 
-echo "Finding new files..."
-
+start_time "Finding new files..."
 # Get the files in the new layer which were *not* present in
 # the old layer, and record them as newFiles.
-comm <(sort -n baseFiles|uniq) \
-     <(sort -n layerFiles|uniq|grep -v ${layer}) -1 -3 > newFiles
+comm <(sort -n baseFiles | uniq) \
+     <(sort -n layerFiles | uniq | grep -v ${layer}) -1 -3 > newFiles
+sed -i s:'^/':: newFiles
+end_time
 
-echo "Building layer..."
-
+start_time "Building layer..."
 # Append the new files to the layer.
-tar -rpf temp/layer.tar --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" \
+tar -C / -rpf temp/layer.tar --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" \
     --owner=0 --group=0 --no-recursion --files-from newFiles
+end_time
 
 # If we have a parentID, add it to the json metadata.
 if [[ -n "$parentID" ]]; then
@@ -86,8 +89,7 @@ if [[ -n "$parentID" ]]; then
   mv tmpjson temp/json
 fi
 
-echo "Building metadata..."
-
+start_time "Building metadata..."
 # Take the sha256 sum of the generated json and use it as the layer ID.
 # Compute the size and add it to the json under the 'Size' field.
 layerID=$(sha256sum temp/json|cut -d ' ' -f 1)
@@ -136,12 +138,14 @@ else
   imageJson=$(cat ${baseJson} | jq ". + {\"rootfs\": {\"diff_ids\": [], \"type\": \"layers\"}}")
   manifestJson=$(jq -n "[{\"RepoTags\":[\"$imageName:$imageTag\"]}]")
 fi
+end_time
 
 # Add a history item and new layer checksum to the image json
 imageJson=$(echo "$imageJson" | jq ".history |= . + [{\"created\": \"$(jq -r .created ${baseJson})\", \"created_by\": \"$imageName:$imageTag\"}]")
-echo "Taking sha256sum of layer..."
+start_time "Taking sha256sum of layer..."
 newLayerChecksum=$(sha256sum $out/$layerID/layer.tar | cut -d ' ' -f1)
 imageJson=$(echo "$imageJson" | jq ".rootfs.diff_ids |= . + [\"sha256:$newLayerChecksum\"]")
+end_time
 
 # Add the new layer to the image manifest
 manifestJson=$(echo "$manifestJson" | jq ".[0].Layers |= . + [\"$layerID/layer.tar\"]")

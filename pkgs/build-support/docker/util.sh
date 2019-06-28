@@ -8,3 +8,15 @@
 ls_tar() {
   tar -tf $1 | xargs -d '\n' realpath -ms --relative-to=. | awk '{ if ($0 != ".") print "/"$0; }'
 }
+
+
+start_time() {
+  echo -n "$1"
+  start=`date +%s.%N`
+}
+
+end_time() {
+  end=`date +%s.%N`
+  tmp=$(echo "scale=2; $end - $start" | bc)
+  echo " ($(printf "%.3g\n" $tmp)s)"
+}

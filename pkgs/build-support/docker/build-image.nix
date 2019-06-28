@@ -11,6 +11,7 @@
   lib,
   pkgs,
   pigz,
+  bc,
   nix,
   runCommand,
   rsync,
@@ -97,7 +98,7 @@ rec {
                   extraCommands;
         };
       result = runCommand "docker-image-${baseName}" {
-        buildInputs = [ jshon pigz coreutils findutils jq pkgs.moreutils ];
+        buildInputs = [ jshon pigz coreutils findutils jq pkgs.moreutils bc ];
         # Image name and tag must be lowercase
         imageName = lib.toLower name;
         imageTag = if tag == null then "" else lib.toLower tag;

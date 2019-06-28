@@ -6,12 +6,12 @@ if [[ -n "$contents" ]]; then
     rsync $rsyncFlags -R --chown=${uid}:${gid} $item/ layer/
 
     # For every executable file in the contents, add a symlink in /bin/
-    if [ -d $item/bin ]; then
+    if [ -e $item/bin ]; then
         mkdir -p layer/bin
         current_dir=$(pwd)
         # Note the -mindepth 1 test, which ensure we don't get the $item/bin directory
         # (since directories can be executable)
-        find $item/bin -mindepth 1 -executable -execdir ln -s $item/bin/{} $current_dir/layer/bin/{} \;
+        find $item/bin/ -mindepth 1 -executable -execdir ln -s $item/bin/{} $current_dir/layer/bin/{} \;
     fi
   done
 else

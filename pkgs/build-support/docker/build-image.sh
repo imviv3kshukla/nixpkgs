@@ -66,7 +66,10 @@ for dep in $(cat $layerClosure); do
   find $dep >> layerFiles
 done
 
-# Record the contents of the tarball with ls_tar.
+# Record the contents of the tarball with ls_tar. This is so that the files it already contains
+# don't get added a second time when we append the closure below. Note that we don't append nix paths
+# to the tarball by default anymore in mk-pure-layer.sh, but do this just to be safe. (For example,
+# this should product us from adding duplicate /bin symlinks or from files created in a root layer.)
 ls_tar temp/layer.tar >> baseFiles
 
 start_time "Finding new files..."
@@ -92,7 +95,7 @@ fi
 start_time "Building metadata..."
 # Take the sha256 sum of the generated json and use it as the layer ID.
 # Compute the size and add it to the json under the 'Size' field.
-layerID=$(sha256sum temp/json|cut -d ' ' -f 1)
+layerID=$(sha256sum temp/json | cut -d ' ' -f 1)
 size=$(stat --printf="%s" temp/layer.tar)
 cat temp/json | jshon -s "$layerID" -i id -n $size -i Size > tmpjson
 mv tmpjson temp/json

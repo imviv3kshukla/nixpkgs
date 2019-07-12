@@ -68,3 +68,7 @@ def build_unzipped(expression, cwd):
                    cwd=cwd, check=True)
 
     return cwd.join("output")
+
+def tar_file_contains(path, needle):
+    contents = subprocess.check_output(["tar", "-tf", path]).decode()
+    return needle in contents

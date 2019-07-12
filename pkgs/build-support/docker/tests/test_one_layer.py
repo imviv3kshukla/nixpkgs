@@ -1,8 +1,4 @@
 
-import docker
-import os
-import subprocess
-
 from util import *
 
 def get_unzipped_image_expression(name, tag):

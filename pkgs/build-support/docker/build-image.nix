@@ -90,7 +90,7 @@ rec {
         if runAsRoot == null
         then mkPureLayer {
           name = baseName;
-          inherit baseJson contents keepContentsDirlinks extraCommands uid gid;
+          inherit baseJson contents extraCommands uid gid;
         } else mkRootLayer {
           name = baseName;
           inherit baseJson fromImage fromImageName fromImageTag
@@ -127,10 +127,6 @@ rec {
     baseJson,
     # Files to add to the layer.
     contents ? null,
-    # When copying the contents into the image, preserve symlinks to
-    # directories (see `rsync -K`).  Otherwise, transform those symlinks
-    # into directories.
-    keepContentsDirlinks ? false,
     # Additional commands to run on the layer before it is tar'd up.
     extraCommands ? "",
     # uid and gid to apply to all files in the layer
@@ -139,7 +135,6 @@ rec {
     runCommand "docker-layer-${name}" {
       inherit baseJson contents extraCommands uid gid;
       buildInputs = [ jshon rsync tarsum ];
-      rsyncFlags = ''-a${if keepContentsDirlinks then "K" else "k"}'';
       script = ./mk-pure-layer.sh;
     } "source $script";
 

@@ -24,6 +24,10 @@ stdenv.mkDerivation rec {
     cmakeFlagsArray+=(-DCMAKE_CXX_FLAGS="-fvisibility=hidden -fno-rtti")
   '';
 
+  patches = [
+    ./fix_string_id_handling.patch
+  ];
+
   shell = runtimeShell;
   postFixup = ''
     # We need to tell ccls where to find the standard library headers.

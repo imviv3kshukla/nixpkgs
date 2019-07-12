@@ -1,0 +1,78 @@
+diff --git a/src/lsp.cc b/src/lsp.cc
+index 5c56f324..a41a809f 100644
+--- a/src/lsp.cc
++++ b/src/lsp.cc
+@@ -26,16 +26,16 @@ namespace ccls {
+ void Reflect(JsonReader &vis, RequestId &v) {
+   if (vis.m->IsInt64()) {
+     v.type = RequestId::kInt;
+-    v.value = int(vis.m->GetInt64());
++    v.value = std::to_string(int(vis.m->GetInt64()));
+   } else if (vis.m->IsInt()) {
+     v.type = RequestId::kInt;
+-    v.value = vis.m->GetInt();
++    v.value = std::to_string(vis.m->GetInt());
+   } else if (vis.m->IsString()) {
+     v.type = RequestId::kString;
+-    v.value = atoll(vis.m->GetString());
++    v.value = vis.m->GetString();
+   } else {
+     v.type = RequestId::kNone;
+-    v.value = -1;
++    v.value.clear();
+   }
+ }
+
+@@ -45,11 +45,10 @@ void Reflect(JsonWriter &visitor, RequestId &value) {
+     visitor.Null();
+     break;
+   case RequestId::kInt:
+-    visitor.Int(value.value);
++    visitor.Int(atoll(value.value.c_str()));
+     break;
+   case RequestId::kString:
+-    auto s = std::to_string(value.value);
+-    visitor.String(s.c_str(), s.size());
++    visitor.String(value.value.c_str(), value.value.size());
+     break;
+   }
+ }
+diff --git a/src/lsp.hh b/src/lsp.hh
+index b097a541..5a137964 100644
+--- a/src/lsp.hh
++++ b/src/lsp.hh
+@@ -23,6 +23,7 @@ limitations under the License.
+
+ #include <chrono>
+ #include <iosfwd>
++#include <string>
+
+ namespace ccls {
+ struct RequestId {
+@@ -31,7 +32,7 @@ struct RequestId {
+   enum Type { kNone, kInt, kString };
+   Type type = kNone;
+
+-  int value = -1;
++  std::string value;
+
+   bool Valid() const { return type != kNone; }
+ };
+diff --git a/src/pipeline.cc b/src/pipeline.cc
+index 65de7d51..b9f440e2 100644
+--- a/src/pipeline.cc
++++ b/src/pipeline.cc
+@@ -810,11 +810,10 @@ static void Reply(RequestId id, const char *key,
+     w.Null();
+     break;
+   case RequestId::kInt:
+-    w.Int(id.value);
++    w.Int(atoll(id.value.c_str()));
+     break;
+   case RequestId::kString:
+-    auto s = std::to_string(id.value);
+-    w.String(s.c_str(), s.length());
++    w.String(id.value.c_str(), id.value.length());
+     break;
+   }
+   w.Key(key);

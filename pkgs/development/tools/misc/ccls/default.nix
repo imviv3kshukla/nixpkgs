@@ -8,8 +8,8 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "MaskRay";
     repo = "ccls";
-    rev = version;
-    sha256 = "1yvxliryqx2bc7r6ri4iafbrjx19jk8hnfbvq5xla72q0gqb97lf";
+    rev = "df002f7ae15eb0c734938e3ba59165507cf3ad96";
+    sha256 = "0gfi1zhds9v8w2bhfdfxwyj97r7ba5r7qkkq1kvzdhnl5c0427fx";
   };
 
   nativeBuildInputs = [ cmake makeWrapper ];
@@ -25,7 +25,7 @@ stdenv.mkDerivation rec {
   '';
 
   patches = [
-    ./fix_string_id_handling.patch
+
   ];
 
   shell = runtimeShell;

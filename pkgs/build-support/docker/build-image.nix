@@ -60,7 +60,9 @@ rec {
     # Docker config; e.g. what command to run on the container.
     config ? null,
     # Optional bash script to run on the files prior to fixturizing the layer.
-    extraCommands ? "", uid ? 0, gid ? 0,
+    extraCommands ? "",
+    # UID and GID to apply to every file in the layer
+    uid ? 0, gid ? 0,
     # Optional bash script to run as root on the image when provisioning.
     runAsRoot ? null,
     # Size of the virtual machine disk to provision when building the image.

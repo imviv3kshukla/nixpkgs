@@ -22,6 +22,7 @@
 , prompt_toolkit
 , pexpect
 , appnope
+, skipNoUserSite ? false
 }:
 
 buildPythonPackage rec {
@@ -47,6 +48,8 @@ buildPythonPackage rec {
   ] ++ lib.optionals stdenv.isDarwin [ appnope ];
 
   LC_ALL="en_US.UTF-8";
+
+  inherit skipNoUserSite;
 
   doCheck = false; # Circular dependency with ipykernel
 

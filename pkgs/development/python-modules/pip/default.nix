@@ -10,6 +10,7 @@
 , pytest
 , setuptools
 , wheel
+, permitUserSite ? false
 }:
 
 buildPythonPackage rec {
@@ -31,6 +32,8 @@ buildPythonPackage rec {
   checkInputs = [ mock scripttest virtualenv pretend pytest ];
   # Pip wants pytest, but tests are not distributed
   doCheck = false;
+
+  inherit permitUserSite;
 
   meta = {
     description = "The PyPA recommended tool for installing Python packages";

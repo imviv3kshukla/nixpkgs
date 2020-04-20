@@ -10,12 +10,15 @@
 , pytest
 , setuptools
 , wheel
+, permitUserSite ? false
 }:
 
 buildPythonPackage rec {
   pname = "pip";
   version = "19.3.1";
   format = "other";
+
+  inherit permitUserSite;
 
   src = fetchFromGitHub {
     owner = "pypa";

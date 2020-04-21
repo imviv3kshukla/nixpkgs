@@ -17,6 +17,9 @@ rec {
     mkdir tarsum
     cd tarsum
 
+    mkdir home
+    export HOME=$PWD/home
+
     cp ${./tarsum.go} tarsum.go
     export GOPATH=$(pwd)
     mkdir -p src/github.com/docker/docker/pkg

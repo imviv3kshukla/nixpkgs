@@ -9,6 +9,36 @@
 
 let deps = import ./deps.nix { inherit fetchurl; };
 
+    version = "2020-04-17";
+
+    # Build the nuget source needed for the later build all by itself
+    # since it's a time-consuming step that only depends on ./deps.nix.
+    # This makes it easier to experiment with the main build.
+    nugetSource = stdenv.mkDerivation {
+      pname = "python-language-server-nuget-deps";
+      version = version;
+
+      unpackPhase = "true";
+
+      buildInputs = [Nuget];
+
+      buildPhase = ''
+        mkdir home
+        export HOME=$PWD/home
+
+        mkdir -p $out/lib
+
+        # disable default-source so nuget does not try to download from online-repo
+        nuget sources Disable -Name "nuget.org"
+        # add all dependencies to the source
+        for package in ${toString deps}; do
+          nuget add $package -Source $out/lib
+        done
+      '';
+
+      installPhase = "true";
+    };
+
 in
 
 stdenv.mkDerivation {
@@ -35,39 +65,32 @@ stdenv.mkDerivation {
     export DOTNET_CLI_TELEMETRY_OPTOUT=1
     export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
-    # disable default-source so nuget does not try to download from online-repo
-    nuget sources Disable -Name "nuget.org"
-    # add all dependencies to a source called 'nixos'
-    for package in ${toString deps}; do
-      nuget add $package -Source nixos
-    done
-
     pushd src
-    dotnet restore --source ../nixos -r linux-x64
-    echo "FINISHED RESTORE"
+    nuget sources Disable -Name "nuget.org"
+    dotnet restore --source ${nugetSource}/lib -r linux-x64
     popd
 
     pushd src/LanguageServer/Impl
-    dotnet build --no-restore -c Release -r linux-x64
+    dotnet publish --no-restore -c Release -r linux-x64
     popd
   '';
 
   installPhase = ''
     mkdir -p $out
-    cp -r output $out/lib
+    cp -r output/bin/Release/linux-x64/publish $out/lib
 
     mkdir $out/bin
-    makeWrapper $out/lib/bin/Release/Microsoft.Python.LanguageServer $out/bin/python-language-server \
+    makeWrapper $out/lib/Microsoft.Python.LanguageServer $out/bin/python-language-server \
       --suffix LD_LIBRARY_PATH : ${icu}/lib
   '';
 
   dontStrip = true;
 
-  meta = {
+  meta = with stdenv.lib; {
     description = "Microsoft Language Server for Python";
     homepage = "https://github.com/microsoft/python-language-server";
-    license = stdenv.lib.licenses.asl20;
-    maintainers = with stdenv.lib.maintainers; [ thomasjm ];
-    platforms = with stdenv.lib.platforms; linux;
+    license = licenses.asl20;
+    maintainers = with maintainers; [ thomasjm ];
+    platforms = platforms.linux;
   };
 }

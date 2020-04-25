@@ -1,7 +1,6 @@
 { stdenv
 , fetchFromGitHub
 , fetchurl
-, icu
 , makeWrapper
 , dotnet-sdk_3
 , Nuget
@@ -43,7 +42,7 @@ in
 
 stdenv.mkDerivation {
   pname = "python-language-server";
-  version = "2020-04-17";
+  version = version;
 
   src = fetchFromGitHub {
     owner = "microsoft";
@@ -53,7 +52,6 @@ stdenv.mkDerivation {
   };
 
   buildInputs = [
-    icu
     Nuget
     dotnet-sdk_3
     makeWrapper
@@ -75,13 +73,29 @@ stdenv.mkDerivation {
     popd
   '';
 
+  # Note: if you want to try using this with libicu, you can remove the DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+  # value below and instead pass "--suffix LD_LIBRARY_PATH : ${icu}/lib" to makeWrapper.
+
+  # However, the language server doesn't load the shared library correctly and crashes immediately,
+  # as in issue https://github.com/NixOS/nixpkgs/issues/73810
+
+  # This seems to be a common issue with dotnet applications; see also
+  # https://github.com/dotnet/core/issues/2186
+
+  # Not sure why LD_LIBRARY_PATH wasn't working; the dotnet documentation indicates that it should work
+  # and strace shows that it at least tries to open the desired libicu file.
+
+  # It would be nice to get libicu integrated because then the application will have better internationalization
+  # behavior, as described here:
+  # https://github.com/dotnet/runtime/blob/master/docs/design/features/globalization-invariant-mode.md
+
   installPhase = ''
     mkdir -p $out
     cp -r output/bin/Release/linux-x64/publish $out/lib
 
     mkdir $out/bin
     makeWrapper $out/lib/Microsoft.Python.LanguageServer $out/bin/python-language-server \
-      --suffix LD_LIBRARY_PATH : ${icu}/lib
+      --set DOTNET_SYSTEM_GLOBALIZATION_INVARIANT true
   '';
 
   dontStrip = true;

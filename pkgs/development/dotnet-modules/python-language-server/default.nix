@@ -1,10 +1,9 @@
 { stdenv
 , fetchFromGitHub
 , fetchurl
+, icu
 , makeWrapper
-, dotnet-sdk
 , dotnet-sdk_3
-, mono
 , Nuget
 }:
 
@@ -23,8 +22,12 @@ stdenv.mkDerivation {
     sha256 = "1b40phk5ya7rxkv3gzdlqwn3a41yydb98ibgnljhzban01cnw3zp";
   };
 
-  buildInputs = [Nuget
-                 dotnet-sdk_3];
+  buildInputs = [
+    icu
+    Nuget
+    dotnet-sdk_3
+    makeWrapper
+  ];
 
   buildPhase = ''
     mkdir home
@@ -54,8 +57,8 @@ stdenv.mkDerivation {
     cp -r output $out/lib
 
     mkdir $out/bin
-    cd $out/bin
-    ln -s ../lib/bin/Release/Microsoft.Python.LanguageServer ./python-language-server
+    makeWrapper $out/lib/bin/Release/Microsoft.Python.LanguageServer $out/bin/python-language-server \
+      --suffix LD_LIBRARY_PATH : ${icu}/lib
   '';
 
   dontStrip = true;

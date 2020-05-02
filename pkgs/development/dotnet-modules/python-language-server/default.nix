@@ -3,6 +3,8 @@
 , fetchurl
 , makeWrapper
 , dotnet-sdk_3
+, openssl
+, patchelf
 , Nuget
 }:
 
@@ -50,11 +52,12 @@ stdenv.mkDerivation {
     sha256 = "0p2sw6w6fymdlxn8r5ndvija2l7rd77f5rddq9n71dxj1nicljh3";
   };
 
-  buildInputs = [dotnet-sdk_3];
+  buildInputs = [dotnet-sdk_3 openssl];
 
   nativeBuildInputs = [
     Nuget
     makeWrapper
+    patchelf
   ];
 
   buildPhase = ''
@@ -96,6 +99,10 @@ stdenv.mkDerivation {
     mkdir $out/bin
     makeWrapper $out/lib/Microsoft.Python.LanguageServer $out/bin/python-language-server \
       --set DOTNET_SYSTEM_GLOBALIZATION_INVARIANT true
+  '';
+
+  postFixup = ''
+    patchelf --set-rpath ${openssl.out}/lib $out/lib/System.Security.Cryptography.Native.OpenSsl.so
   '';
 
   # If we don't disable stripping, the executable fails to start with an error about being unable

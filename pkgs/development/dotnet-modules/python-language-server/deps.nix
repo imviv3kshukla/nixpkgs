@@ -84,6 +84,12 @@ in [
 
   (fetchNuGet {
     name = "Microsoft.AspNetCore.App.Runtime.linux-x64";
+    version = "3.1.1";
+    sha256 = "02zh05lqwdr1vy3r9079lzda3s0m8ils3d52klpqbk3zspa114f4";
+  })
+
+  (fetchNuGet {
+    name = "Microsoft.AspNetCore.App.Runtime.linux-x64";
     version = "3.1.2";
     sha256 = "19wfh9yg4n2khbl7pvf6ngx95m5p8lw4l9y935pv7nh4xgwk02p9";
   })
@@ -194,6 +200,12 @@ in [
     name = "Microsoft.NetCore.App.Runtime.linux-x64";
     version = "3.0.3";
     sha256 = "1ykgfnphbkyck0gqbbh5n96w59z2bq47g896ygal1j4nblj3s44v";
+  })
+
+  (fetchNuGet {
+    name = "Microsoft.NetCore.App.Runtime.linux-x64";
+    version = "3.1.1";
+    sha256 = "0waxppkb2llh98rs3h15rq6dqagx0snjs3k20143lfjbv1xjabb9";
   })
 
   (fetchNuGet {

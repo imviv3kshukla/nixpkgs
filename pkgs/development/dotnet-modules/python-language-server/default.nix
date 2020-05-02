@@ -4,6 +4,7 @@
 , makeWrapper
 , dotnet-sdk_3
 , openssl
+, icu
 , patchelf
 , Nuget
 }:
@@ -52,7 +53,7 @@ stdenv.mkDerivation {
     sha256 = "0p2sw6w6fymdlxn8r5ndvija2l7rd77f5rddq9n71dxj1nicljh3";
   };
 
-  buildInputs = [dotnet-sdk_3 openssl];
+  buildInputs = [dotnet-sdk_3 openssl icu];
 
   nativeBuildInputs = [
     Nuget
@@ -76,32 +77,16 @@ stdenv.mkDerivation {
     popd
   '';
 
-  # Note: if you want to try using this with libicu, you can remove the DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
-  # value below and instead pass "--suffix LD_LIBRARY_PATH : ${icu}/lib" to makeWrapper.
-
-  # However, the language server doesn't load the shared library correctly and crashes immediately,
-  # as in issue https://github.com/NixOS/nixpkgs/issues/73810
-
-  # This seems to be a common issue with dotnet applications; see also
-  # https://github.com/dotnet/core/issues/2186
-
-  # Not sure why LD_LIBRARY_PATH wasn't working; the dotnet documentation indicates that it should work
-  # and strace shows that it at least tries to open the desired libicu file.
-
-  # It would be nice to get libicu integrated because then the application will have better internationalization
-  # behavior, as described here:
-  # https://github.com/dotnet/runtime/blob/master/docs/design/features/globalization-invariant-mode.md
-
   installPhase = ''
     mkdir -p $out
     cp -r output/bin/Release/linux-x64/publish $out/lib
 
     mkdir $out/bin
-    makeWrapper $out/lib/Microsoft.Python.LanguageServer $out/bin/python-language-server \
-      --set DOTNET_SYSTEM_GLOBALIZATION_INVARIANT true
+    makeWrapper $out/lib/Microsoft.Python.LanguageServer $out/bin/python-language-server
   '';
 
   postFixup = ''
+    patchelf --set-rpath ${icu}/lib $out/lib/System.Globalization.Native.so
     patchelf --set-rpath ${openssl.out}/lib $out/lib/System.Security.Cryptography.Native.OpenSsl.so
   '';
 

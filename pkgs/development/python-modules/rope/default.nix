@@ -2,13 +2,11 @@
 
 buildPythonPackage rec {
   pname = "rope";
-  version = "0.14.0";
-
-  disabled = pythonAtLeast "3.8";  # 0.17 should support Python 3.8
+  version = "0.17.0";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "1bwayj0hh459s3yh0sdrxksr9wfilgi3a49izfaj06kvgyladif5";
+    sha256 = "1qa9nqryp05ah9b4r8cy5ph31kr9cm4ak79pvzbg7p23bxqdd2k5";
   };
 
   checkInputs = [ nose ];

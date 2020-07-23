@@ -1,9 +1,11 @@
 
+mkdir -p $out
+
 eval "$initialCommand"
 
 . "$utilSource"
 
-mkdir -p $out
+
 touch baseFiles
 touch layer-list
 if [[ -n "$fromImage" ]]; then
@@ -165,6 +167,6 @@ jshon -n object \
       -i "$imageName" > $out/repositories
 
 # Make the image read-only.
-chmod -R a-w $out
+chmod -R 744 $out
 
 echo "Finished."

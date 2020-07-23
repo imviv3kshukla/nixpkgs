@@ -12,13 +12,13 @@ if [[ -n "$contents" ]]; then
     # been included yet in an earlier layer.
     # However, we do need to add other files like executable symlinks.
 
-    # For every executable file in the contents, add a symlink in /bin/
+    # For every executable file in the contents, add a symlink in /$BIN_FOLDER/
     if [ -e $item/bin ]; then
-        mkdir -p layer/bin
+        mkdir -p layer/$BIN_FOLDER
         current_dir=$(pwd)
         # Note the -mindepth 1 test, which ensure we don't get the $item/bin directory
         # (since directories can be executable)
-        find $item/bin/ -mindepth 1 -executable -execdir ln -s $item/bin/{} $current_dir/layer/bin/{} \;
+        find $item/bin/ -mindepth 1 -executable -execdir ln -s $item/bin/{} $current_dir/layer/$BIN_FOLDER/{} \;
     fi
   done
 else

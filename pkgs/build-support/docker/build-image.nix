@@ -69,6 +69,11 @@ rec {
     diskSize ? 1024,
     # Time of creation of the image.
     created ? "1970-01-01T00:00:01Z",
+    # Folder in the image under which to put bin symlinks.
+    # This is configurable because some base images (such as ubuntu:20.04
+    # at time of writing) make /bin a symlink to /usr/bin, so turning it into
+    # a folder to contain nix bin symlinks blows it away.
+    binFolder ? "bin"
   }:
 
     let
@@ -92,7 +97,7 @@ rec {
         if runAsRoot == null
         then mkPureLayer {
           name = baseName;
-          inherit baseJson contents extraCommands uid gid;
+          inherit baseJson contents extraCommands uid gid binFolder;
         } else mkRootLayer {
           name = baseName;
           inherit baseJson fromImage fromImageName fromImageTag
@@ -132,13 +137,15 @@ rec {
     # Additional commands to run on the layer before it is tar'd up.
     extraCommands ? "",
     # uid and gid to apply to all files in the layer
-    uid ? 0, gid ? 0
+    uid ? 0, gid ? 0,
+    # folder in the image under which to put bin symlinks
+    binFolder ? "bin"
   }:
     runCommand "docker-layer-${name}" {
       inherit baseJson contents extraCommands uid gid;
       buildInputs = [ jshon rsync tarsum ];
       script = ./mk-pure-layer.sh;
-    } "source $script";
+    } ''export BIN_FOLDER="${binFolder}"; source $script'';
 
   # Make a "root" layer; required if we need to execute commands as a
   # privileged user on the image. The commands themselves will be

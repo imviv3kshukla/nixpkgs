@@ -120,10 +120,18 @@ if [[ -n "$fromImage" ]]; then
 
   # Merge the config specified for this layer with the config from the base image.
 
-  # For Env variables, we append them to the base image
+  # For Env variables, we merge them with those of the base image
   newEnv=$(echo "$baseJsonContents" | jq ".config.Env")
   if [[ -n "$newEnv" && ("$newEnv" != "null") ]]; then
-    imageJson=$(echo "$imageJson" | jq ".config.Env |= . + ${newEnv}")
+    oldEnv=$(echo "$imageJson" | jq ".config.Env") || "[]"
+    oldEnvWithSpaces=$(echo "$oldEnv" | jq -j '.[]|.," "')
+
+    newEnvWithSpaces=$(echo "$newEnv" | jq -j '.[]|.," "')
+
+    # TODO: sanitize the environment variables for security before putting into a shell command?
+    finalEnv=$(env -i $oldEnvWithSpaces $newEnvWithSpaces | head -c -1 | jq --raw-input --slurp 'split("\n")')
+
+    imageJson=$(echo "$imageJson" | jq ".config.Env |= . + ${finalEnv}")
   fi
 
   # Volumes likewise get added to existing volumes

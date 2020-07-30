@@ -73,7 +73,9 @@ rec {
     # This is configurable because some base images (such as ubuntu:20.04
     # at time of writing) make /bin a symlink to /usr/bin, so turning it into
     # a folder to contain nix bin symlinks blows it away.
-    binFolder ? "bin"
+    binFolder ? "bin",
+    # Extra build inputs (to be used in extraCommands or runAsRoot)
+    extraBuildInputs ? []
   }:
 
     let
@@ -97,15 +99,15 @@ rec {
         if runAsRoot == null
         then mkPureLayer {
           name = baseName;
-          inherit baseJson contents extraCommands uid gid binFolder;
+          inherit baseJson contents extraCommands extraBuildInputs uid gid binFolder;
         } else mkRootLayer {
           name = baseName;
           inherit baseJson fromImage fromImageName fromImageTag
                   contents keepContentsDirlinks runAsRoot diskSize
-                  extraCommands;
+                  extraCommands binFolder;
         };
       result = runCommand "docker-image-${baseName}" {
-        buildInputs = [ jshon pigz coreutils findutils jq pkgs.moreutils bc ];
+        buildInputs = [ jshon pigz coreutils findutils jq pkgs.moreutils bc ] ++ extraBuildInputs;
         # Image name and tag must be lowercase
         imageName = lib.toLower name;
         imageTag = if tag == null then "" else lib.toLower tag;
@@ -139,11 +141,13 @@ rec {
     # uid and gid to apply to all files in the layer
     uid ? 0, gid ? 0,
     # folder in the image under which to put bin symlinks
-    binFolder ? "bin"
+    binFolder ? "bin",
+    # Extra build inputs
+    extraBuildInputs ? []
   }:
     runCommand "docker-layer-${name}" {
       inherit baseJson contents extraCommands uid gid;
-      buildInputs = [ jshon rsync tarsum ];
+      buildInputs = [ jshon rsync tarsum ] ++ extraBuildInputs;
       script = ./mk-pure-layer.sh;
     } ''export BIN_FOLDER="${binFolder}"; source $script'';
 
@@ -172,7 +176,11 @@ rec {
     # How much disk to allocate for the temporary virtual machine.
     diskSize ? 1024,
     # Commands (bash) to run on the layer; these do not require sudo.
-    extraCommands ? ""
+    extraCommands ? "",
+    # folder in the image under which to put bin symlinks
+    binFolder ? "bin",
+    # Extra build inputs
+    extraBuildInputs ? [] # TODO
   }:
     # Generate an executable script from the `runAsRoot` text.
     let

@@ -32,6 +32,11 @@ stdenv.mkDerivation rec {
     sha256 = "1fqgpzfas85dn0sxlvvg6rj488jwgnxs8d3gqcm8lgs211m9qhcf";
   };
 
+  patches = [
+    # https://github.com/tmux/tmux/issues/2438
+    ./fix-race.patch
+  ];
+
   nativeBuildInputs = [
     pkgconfig
     autoreconfHook

@@ -1,0 +1,29 @@
+commit 4c8df7a9c7b84043dc14c31d641a9a7e2aa8994a
+Author: Tom McLaughlin <tom@codedown.io>
+Date:   Wed Oct 28 04:13:11 2020 -0600
+
+    Fix race
+
+diff --git a/server-client.c b/server-client.c
+index fe72317a..3c31558f 100644
+--- a/server-client.c
++++ b/server-client.c
+@@ -1975,13 +1975,13 @@ server_client_dispatch_identify(struct client *c, struct imsg *imsg)
+ 	}
+ 
+ 	/*
+-	 * If this is the first client that has finished identifying, load
+-	 * configuration files.
++	 * If this is the first client, load configuration files. Any later
++	 * clients are allowed to continue with their command even if the
++	 * config has not been loaded - they might have been run from inside it
+ 	 */
+ 	if ((~c->flags & CLIENT_EXIT) &&
+-	    !cfg_finished &&
+-	    c == TAILQ_FIRST(&clients) &&
+-	    TAILQ_NEXT(c, entry) == NULL)
++	     !cfg_finished &&
++	     c == TAILQ_FIRST(&clients))
+ 		start_cfg();
+ }
+ 

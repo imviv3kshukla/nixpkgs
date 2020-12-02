@@ -21,7 +21,7 @@ in
 
 stdenv.mkDerivation rec {
   pname = "tmux";
-  version = "3.1c";
+  version = "3.2-rc";
 
   outputs = [ "out" "man" ];
 
@@ -29,13 +29,8 @@ stdenv.mkDerivation rec {
     owner = "tmux";
     repo = "tmux";
     rev = version;
-    sha256 = "1fqgpzfas85dn0sxlvvg6rj488jwgnxs8d3gqcm8lgs211m9qhcf";
+    sha256 = "0h4wpdjdspgr3c9i8l6hjyc488dqm60j3vaqzznvxqfjzzf3s7dg";
   };
-
-  patches = [
-    # https://github.com/tmux/tmux/issues/2438
-    ./fix-race.patch
-  ];
 
   nativeBuildInputs = [
     pkgconfig

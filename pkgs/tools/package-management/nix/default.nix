@@ -30,7 +30,7 @@ common =
   let
      sh = busybox-sandbox-shell;
      nix = stdenv.mkDerivation rec {
-      inherit name src;
+      inherit name src patches;
       version = lib.getVersion name;
 
       is24 = lib.versionAtLeast version "2.4pre";

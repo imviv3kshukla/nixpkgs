@@ -1,0 +1,24 @@
+diff --git a/base/loading.jl b/base/loading.jl
+index f63bb6bfef..1a0c07b4fa 100644
+--- a/base/loading.jl
++++ b/base/loading.jl
+@@ -1229,8 +1229,9 @@ function compilecache_path(pkg::PkgId)::String
+     if pkg.uuid === nothing
+         abspath(cachepath, entryfile) * ".ji"
+     else
+-        crc = _crc32c(something(Base.active_project(), ""))
+-        crc = _crc32c(unsafe_string(JLOptions().image_file), crc)
++        println("Base.active_project()", Base.active_project())
++        # crc = _crc32c(something(Base.active_project(), ""))
++        crc = _crc32c(something(unsafe_string(JLOptions().image_file), ""))
+         crc = _crc32c(unsafe_string(JLOptions().julia_bin), crc)
+         project_precompile_slug = slug(crc, 5)
+         abspath(cachepath, string(entryfile, "_", project_precompile_slug, ".ji"))
+@@ -1256,6 +1257,7 @@ const MAX_NUM_PRECOMPILE_FILES = 10
+ function compilecache(pkg::PkgId, path::String)
+     # decide where to put the resulting cache file
+     cachefile = compilecache_path(pkg)
++    println("Got cachefile", cachefile);
+     cachepath = dirname(cachefile)
+     # prune the directory with cache files
+     if pkg.uuid !== nothing

@@ -98,6 +98,27 @@ with lib;
     default = [ ];
   };
 
+  extraEnvironment = mkOption {
+    type = types.attrs;
+    description = ''
+      Extra environment variables to set for the runner, as an attrset.
+    '';
+    example = {
+      GIT_CONFIG = "/path/to/git/config";
+    };
+    default = {};
+  };
+
+  serviceOverrides = mkOption {
+    type = types.attrs;
+    description = ''
+      Overrides for the systemd service.
+    '';
+    default = {
+      ProtectHome = false;
+    };
+  };
+
   package = mkOption {
     type = types.package;
     description = ''

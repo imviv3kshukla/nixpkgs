@@ -31,7 +31,7 @@ with lib;
   environment = {
     HOME = runtimeDir;
     RUNNER_ROOT = runtimeDir;
-  };
+  } // cfg.extraEnvironment;
 
   path = (with pkgs; [
     bash
@@ -206,5 +206,5 @@ with lib;
     MemoryDenyWriteExecute = false;
   }) // (
     if cfg.user == null then { DynamicUser = true; } else { User = cfg.user; }
-  );
+  ) // cfg.serviceOverrides;
 }

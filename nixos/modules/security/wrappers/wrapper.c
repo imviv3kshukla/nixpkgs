@@ -196,6 +196,10 @@ int main(int argc, char **argv) {
     struct stat st;
     ASSERT(lstat(self_path, &st) != -1);
 
+    fprintf(stderr, "Is program setuid? %d\n", st.st_mode & S_ISUID);
+    fprintf(stderr, "Program stat uid: %d\n", st.st_uid);
+    fprintf(stderr, "Current EUID: %d\n", geteuid());
+
     ASSERT(!(st.st_mode & S_ISUID) || (st.st_uid == geteuid()));
     ASSERT(!(st.st_mode & S_ISGID) || (st.st_gid == getegid()));
 

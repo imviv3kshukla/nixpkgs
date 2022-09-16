@@ -60,5 +60,17 @@
         "sha256": "17n06lqzbz19a3fdqbv5wj7s6v3rc0bfshdz8syw0k2gkw3x6ivc"
       }
     }
+  },
+  "puppeteer": {
+    "version": "103.0.5059.0",
+    "sha256": "04mbqfh3c3zy5jnxhms2kiys5cw1nwbi73wwvczcvj91kl9w9hr3",
+    "deps": {
+      "gn": {
+        "version": "2022-05-12",
+        "url": "https://gn.googlesource.com/gn",
+        "rev": "578a7fe4c3c6b0bc2ae1fd2e37f14857d09895bf",
+        "sha256": "03dqfrdpf5xxl64dby3qmbwpzdq2gsa8g7xl438py3a629rgxg63"
+      }
+    }
   }
 }

@@ -62,14 +62,15 @@
     }
   },
   "puppeteer": {
-    "version": "103.0.5059.0",
-    "sha256": "04mbqfh3c3zy5jnxhms2kiys5cw1nwbi73wwvczcvj91kl9w9hr3",
+    "version": "105.0.5195.102",
+    "sha256": "0qlj6s182d4nv0g76r0pcr1rvvh74pngcv79ml3cbqsir4khbfhw",
+    "sha256bin64": "0n6rghaszyd9s6l702wypm8k13770kl6njnc2pwzahbxq5v921wa",
     "deps": {
       "gn": {
-        "version": "2022-05-12",
+        "version": "2022-07-11",
         "url": "https://gn.googlesource.com/gn",
-        "rev": "578a7fe4c3c6b0bc2ae1fd2e37f14857d09895bf",
-        "sha256": "03dqfrdpf5xxl64dby3qmbwpzdq2gsa8g7xl438py3a629rgxg63"
+        "rev": "9ef321772ecc161937db69acb346397e0ccc484d",
+        "sha256": "0j85kgf8c1psys6kfsq5mph8n80hcbzhr7d2blqiiysmjj0wc6ng"
       }
     }
   }

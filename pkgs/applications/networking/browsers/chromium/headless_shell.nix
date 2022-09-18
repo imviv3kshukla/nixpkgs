@@ -2,7 +2,10 @@
 , gn
 , ungoogled
 , stdenv
-, mkWrapper
+, makeWrapper
+, fetchgit
+, fontconfig
+, callPackage
 }:
 
 with lib;
@@ -10,12 +13,15 @@ with lib;
 let
   channel = "puppeteer";
 
+  upstream-info = (lib.importJSON ./upstream-info.json).${channel};
+
   mkChromiumDerivation = callPackage ./common.nix ({
-    inherit channel ungoogled;
+    inherit channel upstream-info ungoogled;
     pulseSupport = false;
     cupsSupport = false;
     proprietaryCodecs = false;
-    enableWideVine = false;
+    chromiumVersionAtLeast = _: _: null;
+    versionRange = _: _: null;
     gnChromium = gn.overrideAttrs (oldAttrs: {
       inherit (upstream-info.deps.gn) version;
       src = fetchgit {

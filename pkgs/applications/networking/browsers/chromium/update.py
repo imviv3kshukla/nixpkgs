@@ -125,6 +125,8 @@ def channel_name_to_attr_name(channel_name):
         return 'chromiumDev'
     if channel_name == 'ungoogled-chromium':
         return 'ungoogled-chromium'
+    if channel_name == 'puppeteer':
+        return 'puppeteer'
     print(f'Error: Unexpected channel: {channel_name}', file=sys.stderr)
     sys.exit(1)
 
@@ -140,6 +142,8 @@ def get_channel_key(item):
         return 2
     if channel_name == 'ungoogled-chromium':
         return 3
+    if channel_name == 'puppeteer':
+        return 4
     print(f'Error: Unexpected channel: {channel_name}', file=sys.stderr)
     sys.exit(1)
 

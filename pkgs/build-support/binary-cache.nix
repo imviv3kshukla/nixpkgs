@@ -39,7 +39,7 @@ stdenv.mkDerivation {
 
     os.chdir(os.environ["out"])
 
-    nixPrefix = "/nix/store" # TODO: general Nix prefix
+    nixPrefix = os.environ["NIX_STORE"] # Usually /nix/store
 
     with open("nix-cache-info", "w") as f:
       f.write("StoreDir: " + nixPrefix + "\n")

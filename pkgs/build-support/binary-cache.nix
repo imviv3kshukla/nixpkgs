@@ -27,7 +27,14 @@ stdenv.mkDerivation {
     export out=''${outputs[out]}
 
     mkdir $out
+
+    # Create paths the Nix tool expects to exist, or else it will try to create them
+    # (bad if you're trying to mount this cache read-only)
+    # See https://github.com/NixOS/nix/blob/ac0fb38e8a5a25a84fa17704bd31b453211263eb/src/libstore/local-binary-cache-store.cc#L95-L99
     mkdir $out/nar
+    mkdir $out/realisations
+    mkdir $out/debuginfo
+    mkdir $out/log
 
     python <<EOF
     import json

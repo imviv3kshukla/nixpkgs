@@ -36,15 +36,15 @@ in
   };
 
   config = {
-    systemd.services = flip mapAttrs' cfg (n: v:
+    systemd.services = flip mapAttrs' cfg (name: v:
       let
-        svcName = "github-runner-${n}";
+        svcName = "github-runner-${name}";
       in
         nameValuePair svcName
         (import ./github-runner/service.nix (args // {
           inherit svcName;
-          cfg = v;
-          systemdDir = "github-runner/${n}";
+          cfg = v // { inherit name; };
+          systemdDir = "github-runner/${name}";
         }))
     );
   };

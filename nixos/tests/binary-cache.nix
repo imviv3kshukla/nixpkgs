@@ -1,4 +1,4 @@
-import ./make-test-python.nix ({ lib, pkgs, ... }:
+import ./make-test-python.nix ({ lib, ... }:
 
 with lib;
 
@@ -7,30 +7,15 @@ with lib;
   meta.maintainers = with maintainers; [ thomasjm ];
 
   nodes.machine =
-    { ... }: {
-      environment.systemPackages = [pkgs.src];
+    { pkgs, ... }: {
+      imports = [ ../modules/installer/cd-dvd/channel.nix ];
+      environment.systemPackages = [pkgs.hello.inputDerivation];
     };
 
   testScript = ''
-    status, stdout = machine.execute("env")
-    print("Got env", stdout)
-
-    status, stdout = machine.execute("ls -lh /nix/store")
-    print("Got nix store contents", stdout)
-
-    status, stdout = machine.execute("ls -lh /nix/var/nix/profiles")
-    print("Got profiles contents", stdout)
-
-    status, stdout = machine.execute("ls -lh /nix/var/nix/profiles/per-user")
-    print("Got per-user contents", stdout)
-
-    status, stdout = machine.execute("ls -lh /nix/var/nix/profiles/per-user/root")
-    print("Got root contents", stdout)
-
-    status, stdout = machine.execute("ls -lh /nix/var/nix/profiles/per-user/root/channels")
-    print("Got channels contents", stdout)
-
     machine.succeed("nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }' -o /tmp/cache")
     machine.succeed("ls -lh /tmp/cache")
+
+    # TODO: add some assertions about the contents of the cache
   '';
 })

@@ -30,5 +30,11 @@ stdenv.mkDerivation {
     mkdir $out/nar
 
     python ${./make-binary-cache.py}
+
+    # These directories must exist, or Nix might try to create them in LocalBinaryCacheStore::init(),
+    # which fails if mounted read-only
+    mkdir $out/realisations
+    mkdir $out/debuginfo
+    mkdir $out/log
   '';
 }

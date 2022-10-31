@@ -9,13 +9,23 @@ with lib;
   nodes.machine =
     { pkgs, ... }: {
       imports = [ ../modules/installer/cd-dvd/channel.nix ];
-      environment.systemPackages = [pkgs.hello.inputDerivation];
+      environment.systemPackages = with pkgs; [hello python3];
+      system.extraDependencies = with pkgs; [hello.inputDerivation];
+      nix.extraOptions = ''
+        experimental-features = nix-command
+      '';
     };
 
   testScript = ''
     machine.succeed("nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }' -o /tmp/cache")
-    machine.succeed("ls -lh /tmp/cache")
 
-    # TODO: add some assertions about the contents of the cache
+    # Sanity test of cache structure
+    status, stdout = machine.execute("ls /tmp/cache")
+    cache_files = stdout.split()
+    assert ("nix-cache-info" in cache_files)
+    assert ("nar" in cache_files)
+
+    # Nix store ping should work
+    machine.succeed("nix store ping --store file:///tmp/cache")
   '';
 })

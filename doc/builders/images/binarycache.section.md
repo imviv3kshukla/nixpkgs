@@ -10,4 +10,6 @@ mkBinaryCache {
 }
 ```
 
-- `rootPaths` specifies a list of root derivations. The transitive closure of these derivations will be copied into the cache.
+`rootPaths` _(list of derivations)_
+
+: List of root derivations. The transitive closure of these derivations will be copied into the cache.

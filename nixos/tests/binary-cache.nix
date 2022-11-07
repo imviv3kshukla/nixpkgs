@@ -47,9 +47,14 @@ with lib;
     machine.succeed("[ ! -d %s ] || exit 1" % storePath)
 
     # Should be able to build hello using the cache
-    logs = machine.succeed("nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///tmp/cache")
-    match = re.match(r"^/nix/store/[a-z0-9]*-hello-.*$", str(logs))
-    if not match: raise Exception("Output didn't contain reference to built hello")
+    logs = machine.succeed("nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///tmp/cache --option substituters file:///tmp/cache 2>&1")
+    logLines = logs.split("\n")
+    if not "this path will be fetched" in logLines[0]: raise Exception("Unexpected first log line")
+    def shouldBe(got, desired):
+      if got != desired: raise Exception("Expected '%s' but got '%s'" % (desired, got))
+    shouldBe(logLines[1], "  " + storePath)
+    shouldBe(logLines[2], "copying path '%s' from 'file:///tmp/cache'..." % storePath)
+    shouldBe(logLines[3], storePath)
 
     # Store path should exist in the store now
     machine.succeed("[ -d %s ] || exit 1" % storePath)

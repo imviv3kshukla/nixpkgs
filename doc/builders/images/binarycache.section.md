@@ -2,9 +2,11 @@
 
 `pkgs.mkBinaryCache` is a function for creating Nix flat-file binary caches. Such a cache exists as a directory on disk, and can be used as a Nix substituter by passing `--substituter file:///path/to/cache` to Nix commands.
 
+Nix packages are most commonly shared between machines using [HTTP, SSH, or S3](https://nixos.org/manual/nix/stable/package-management/sharing-packages.html), but a flat-file binary cache can still be useful in some situations. For example, you can copy it directly to another machine, or make it available on a network file system. It can also be a convenient way to make some Nix packages available inside a container via bind-mounting, when you want to efficiently run Nix builds inside a container without doing a writable mount of the host's `/nix` directory.
+
 ## Example
 
-The parameters of `mkBinaryCache` with an example value are described below. This derivation will construct a flat-file binary cache containing the closure of `hello`.
+The following derivation will construct a flat-file binary cache containing the closure of `hello`.
 
 ```nix
 mkBinaryCache {
@@ -13,3 +15,15 @@ mkBinaryCache {
 ```
 
 - `rootPaths` specifies a list of root derivations. The transitive closure of these derivations will be copied into the cache.
+
+Here's an example of building and using the cache.
+
+```bash
+# Build the cache on machine "host1"
+host1> nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }'
+/nix/store/cc0562q828rnjqjyfj23d5q162gb424g-binary-cache
+
+# Copy the resulting directory to "host2"
+host2> nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///path/to/binary-cache
+/nix/store/gl5a41azbpsadfkfmbilh9yk40dh5dl0-hello-2.12.1
+```

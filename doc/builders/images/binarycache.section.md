@@ -24,6 +24,9 @@ host1> nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hell
 /nix/store/cc0562q828rnjqjyfj23d5q162gb424g-binary-cache
 
 # Copy the resulting directory to "host2"
-host2> nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///path/to/binary-cache
+host2> nix-build -A hello '<nixpkgs>' \
+  --option require-sigs false \
+  --option trusted-substituters file:///path/to/binary-cache \
+  --option substituters file:///path/to/binary-cache
 /nix/store/gl5a41azbpsadfkfmbilh9yk40dh5dl0-hello-2.12.1
 ```

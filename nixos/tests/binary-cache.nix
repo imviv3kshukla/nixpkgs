@@ -17,7 +17,10 @@ with lib;
     };
 
   testScript = ''
-    machine.succeed("nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }' -o /tmp/cache")
+    # Build the cache, then remove it from the store
+    cachePath = machine.succeed("nix-build --no-out-link -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }'").strip()
+    machine.succeed("cp -r %s/. /tmp/cache" % cachePath)
+    machine.succeed("nix-store --delete " + cachePath)
 
     # Sanity test of cache structure
     status, stdout = machine.execute("ls /tmp/cache")
@@ -31,21 +34,24 @@ with lib;
     # Cache should contain a .narinfo referring to "hello"
     grepLogs = machine.succeed("grep -l 'StorePath: /nix/store/[[:alnum:]]*-hello-.*' /tmp/cache/*.narinfo")
 
-    # Get the store path referenced by the .narinfo and verify it's not in the store yet
+    # Get the store path referenced by the .narinfo
     narInfoFile = grepLogs.strip()
     narInfoContents = machine.succeed("cat " + narInfoFile)
     import re
     match = re.match(r"^StorePath: (/nix/store/[a-z0-9]*-hello-.*)$", narInfoContents, re.MULTILINE)
     if not match: raise Exception("Couldn't find hello store path in cache")
     storePath = match[1]
-    machine.fail("which " + storePath)
+
+    # Delete the store path
+    machine.succeed("nix-store --delete " + storePath)
+    machine.succeed("[ ! -d %s ] || exit 1" % storePath)
 
     # Should be able to build hello using the cache
-    logs = machine.succeed("nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///tmp/cache 2>&1")
+    logs = machine.succeed("nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///tmp/cache")
     match = re.match(r"^/nix/store/[a-z0-9]*-hello-.*$", str(logs))
     if not match: raise Exception("Output didn't contain reference to built hello")
 
     # Store path should exist in the store now
-    machine.succeed("which " + storePath)
+    machine.succeed("[ -d %s ] || exit 1" % storePath)
   '';
 })

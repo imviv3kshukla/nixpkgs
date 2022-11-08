@@ -46,6 +46,10 @@ with lib;
     machine.succeed("nix-store --delete " + storePath)
     machine.succeed("[ ! -d %s ] || exit 1" % storePath)
 
+    # Should not be able to build hello without the cache, to check the effectiveness of the test
+    machine.fail("nix-build -A hello '<nixpkgs>' --option require-sigs false 2>&1")
+
+
     # Should be able to build hello using the cache
     logs = machine.succeed("nix-build -A hello '<nixpkgs>' --option require-sigs false --option trusted-substituters file:///tmp/cache --option substituters file:///tmp/cache 2>&1")
     logLines = logs.split("\n")

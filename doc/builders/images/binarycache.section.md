@@ -2,7 +2,9 @@
 
 `pkgs.mkBinaryCache` is a function for creating Nix flat-file binary caches. Such a cache exists as a directory on disk, and can be used as a Nix substituter by passing `--substituter file:///path/to/cache` to Nix commands.
 
-Nix packages are most commonly shared between machines using [HTTP, SSH, or S3](https://nixos.org/manual/nix/stable/package-management/sharing-packages.html), but a flat-file binary cache can still be useful in some situations. For example, you can copy it directly to another machine, or make it available on a network file system. It can also be a convenient way to make some Nix packages available inside a container via bind-mounting, when you want to efficiently run Nix builds inside a container without doing a writable mount of the host's `/nix` directory.
+Nix packages are most commonly shared between machines using [HTTP, SSH, or S3](https://nixos.org/manual/nix/stable/package-management/sharing-packages.html), but a flat-file binary cache can still be useful in some situations. For example, you can copy it directly to another machine, or make it available on a network file system. It can also be a convenient way to make some Nix packages available inside a container via bind-mounting.
+
+Note that this function is meant for advanced use-cases. The more idiomatic way to work with flat-file binary caches is via the [nix copy](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-copy.html) command. You may also want to consider [dockerTools](#sec-pkgs-dockerTools) for your containerization needs.
 
 ## Example
 
@@ -24,7 +26,9 @@ Build the cache on one machine, `host1`:
 nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }'
 ```
 
-    /nix/store/cc0562q828rnjqjyfj23d5q162gb424g-binary-cache
+```shellSession
+/nix/store/cc0562q828rnjqjyfj23d5q162gb424g-binary-cache
+```
 
 Copy the resulting directory to the other machine, `host2`:
 
@@ -38,6 +42,8 @@ nix-build -A hello '<nixpkgs>' \
   --option require-sigs false \
   --option trusted-substituters file:///tmp/hello-cache \
   --option substituters file:///tmp/hello-cache
-/nix/store/gl5a41azbpsadfkfmbilh9yk40dh5dl0-hello-2.12.1
 ```
+
+```shellSession
+/nix/store/gl5a41azbpsadfkfmbilh9yk40dh5dl0-hello-2.12.1
 ```

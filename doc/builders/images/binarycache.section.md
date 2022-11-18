@@ -18,15 +18,26 @@ mkBinaryCache {
 
 Here's an example of building and using the cache.
 
-```bash
-# Build the cache on machine "host1"
-host1> nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }'
-/nix/store/cc0562q828rnjqjyfj23d5q162gb424g-binary-cache
+Build the cache on one machine, `host1`:
 
-# Copy the resulting directory to "host2"
-host2> nix-build -A hello '<nixpkgs>' \
+```shellSession
+nix-build -E 'with import <nixpkgs> {}; mkBinaryCache { rootPaths = [hello]; }'
+```
+
+    /nix/store/cc0562q828rnjqjyfj23d5q162gb424g-binary-cache
+
+Copy the resulting directory to the other machine, `host2`:
+
+```shellSession
+scp result host2:/tmp/hello-cache
+```
+
+Build the derivation using the flat-file binary cache on the other machine, `host2`:
+```shellSession
+nix-build -A hello '<nixpkgs>' \
   --option require-sigs false \
-  --option trusted-substituters file:///path/to/binary-cache \
-  --option substituters file:///path/to/binary-cache
+  --option trusted-substituters file:///tmp/hello-cache \
+  --option substituters file:///tmp/hello-cache
 /nix/store/gl5a41azbpsadfkfmbilh9yk40dh5dl0-hello-2.12.1
+```
 ```

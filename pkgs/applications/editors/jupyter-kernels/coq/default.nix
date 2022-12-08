@@ -1,4 +1,5 @@
-{ stdenv
+{ lib
+, stdenv
 , callPackage
 , runCommand
 , makeWrapper
@@ -9,6 +10,9 @@
 
 # To test (in root nixpkgs dir):
 # $(nix-build -E 'with import ./. {}; jupyter.override { definitions = { coq = coq-kernel.definition; }; }')/bin/jupyter-notebook
+
+# To test with packages:
+# $(nix-build -E 'with import ./. {}; jupyter.override { definitions = { coq = coq-kernel.definitionWithPackages [coqPackages.ceres]; }; }')/bin/jupyter-notebook
 
 let
   kernel = callPackage ./kernel.nix {};
@@ -44,7 +48,9 @@ rec {
     '';
   };
 
-  definition = {
+  definition = definitionWithPackages [];
+
+  definitionWithPackages = packages: {
     displayName = "Coq " + coq.version;
     argv = [
       "${launcher}/bin/coq-kernel"
@@ -54,5 +60,8 @@ rec {
     language = "coq";
     logo32 = sizedLogo "32";
     logo64 = sizedLogo "64";
+    env = {
+      COQPATH = lib.concatStringsSep ":" (map (x: "${x}/lib/coq/${coq.coq-version}/user-contrib/") packages);
+    };
   };
 }

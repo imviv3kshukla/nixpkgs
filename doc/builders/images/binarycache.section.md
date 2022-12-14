@@ -4,7 +4,7 @@
 
 Nix packages are most commonly shared between machines using [HTTP, SSH, or S3](https://nixos.org/manual/nix/stable/package-management/sharing-packages.html), but a flat-file binary cache can still be useful in some situations. For example, you can copy it directly to another machine, or make it available on a network file system. It can also be a convenient way to make some Nix packages available inside a container via bind-mounting.
 
-Note that this function is meant for advanced use-cases. The more idiomatic way to work with flat-file binary caches is via the [nix copy](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-copy.html) command. You may also want to consider [dockerTools](#sec-pkgs-dockerTools) for your containerization needs.
+Note that this function is meant for advanced use-cases. The more idiomatic way to work with flat-file binary caches is via the [nix-copy-closure](https://nixos.org/manual/nix/stable/command-ref/nix-copy-closure.html) command. You may also want to consider [dockerTools](#sec-pkgs-dockerTools) for your containerization needs.
 
 ## Example
 

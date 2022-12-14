@@ -1,7 +1,7 @@
 { lib
 , stdenv
 , callPackage
-, runCommandNoCC
+, runCommand
 , makeWrapper
 , coq
 , imagemagick
@@ -17,7 +17,7 @@
 let
   python = python3.withPackages (ps: [ ps.traitlets ps.jupyter_core ps.ipykernel (callPackage ./kernel.nix {}) ]);
 
-  logos = runCommandNoCC "coq-logos" { buildInputs = [ imagemagick ]; } ''
+  logos = runCommand "coq-logos" { buildInputs = [ imagemagick ]; } ''
     mkdir -p $out
     convert ${coq.src}/ide/coqide/coq.png -resize 32x32 $out/logo-32x32.png
     convert ${coq.src}/ide/coqide/coq.png -resize 64x64 $out/logo-64x64.png
@@ -26,7 +26,7 @@ let
 in
 
 rec {
-  launcher = runCommandNoCC "coq-kernel-launcher" {
+  launcher = runCommand "coq-kernel-launcher" {
     nativeBuildInputs = [ makeWrapper ];
   } ''
     mkdir -p $out/bin

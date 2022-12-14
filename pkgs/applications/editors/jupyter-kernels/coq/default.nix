@@ -21,7 +21,6 @@ in
 
 rec {
   launcher = runCommand "coq-kernel-launcher" {
-    inherit coq;
     python = python3.withPackages (ps: [ ps.traitlets ps.jupyter_core ps.ipykernel kernel ]);
     buildInputs = [ makeWrapper ];
   } ''

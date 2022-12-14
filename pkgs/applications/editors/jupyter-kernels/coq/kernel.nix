@@ -5,7 +5,7 @@
 }:
 
 python3.pkgs.buildPythonPackage rec {
-  pname = "coq_jupyter";
+  pname = "coq-jupyter";
   version = "1.6.0";
 
   src = fetchFromGitHub {
@@ -15,7 +15,7 @@ python3.pkgs.buildPythonPackage rec {
     sha256 = "sha256-+Pp51cxeqjg5MW4CEccNWVjNcY9iyFNATIEage9RWJ0=";
   };
 
-  propagatedBuildInputs = (with python3.pkgs; [ipykernel future]) ++ [coq];
+  propagatedBuildInputs = (with python3.pkgs; [ ipykernel future ]) ++ [ coq ];
 
   nativeBuildInputs = [ coq ];
 
@@ -26,6 +26,5 @@ python3.pkgs.buildPythonPackage rec {
     description = "Jupyter kernel for Coq";
     license = licenses.asl20;
     maintainers = with maintainers; [ thomasjm ];
-    platforms = platforms.all;
   };
 }

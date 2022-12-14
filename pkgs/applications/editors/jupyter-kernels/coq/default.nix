@@ -28,7 +28,7 @@ rec {
 
     makeWrapper ${python.interpreter} $out/bin/coq-kernel \
       --add-flags "-m coq_jupyter" \
-      --suffix PATH : $coq/bin
+      --suffix PATH : ${coq}/bin
   '';
 
   sizedLogo = size: stdenv.mkDerivation {

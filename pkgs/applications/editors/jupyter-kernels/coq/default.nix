@@ -1,7 +1,7 @@
 { lib
 , stdenv
 , callPackage
-, runCommand
+, runCommandNoCC
 , makeWrapper
 , coq
 , imagemagick
@@ -15,37 +15,26 @@
 # $(nix-build -E 'with import ./. {}; jupyter.override { definitions = { coq = coq-kernel.definitionWithPackages [coqPackages.ceres]; }; }')/bin/jupyter-notebook
 
 let
-  kernel = callPackage ./kernel.nix {};
+  python = python3.withPackages (ps: [ ps.traitlets ps.jupyter_core ps.ipykernel (callPackage ./kernel.nix {}) ]);
+
+  logos = runCommandNoCC "coq-logos" { buildInputs = [ imagemagick ]; } ''
+    mkdir -p $out
+    convert ${coq.src}/ide/coqide/coq.png -resize 32x32 $out/logo-32x32.png
+    convert ${coq.src}/ide/coqide/coq.png -resize 64x64 $out/logo-64x64.png
+  '';
 
 in
 
 rec {
-  launcher = runCommand "coq-kernel-launcher" {
-    python = python3.withPackages (ps: [ ps.traitlets ps.jupyter_core ps.ipykernel kernel ]);
+  launcher = runCommandNoCC "coq-kernel-launcher" {
     nativeBuildInputs = [ makeWrapper ];
   } ''
     mkdir -p $out/bin
 
-    makeWrapper ${python3.interpreter} $out/bin/coq-kernel \
+    makeWrapper ${python.interpreter} $out/bin/coq-kernel \
       --add-flags "-m coq_jupyter" \
       --suffix PATH : ${coq}/bin
   '';
-
-  sizedLogo = size: stdenv.mkDerivation {
-    pname = "coq-logo-${size}x${size}.png";
-    inherit (coq) version;
-
-    src = coq.src;
-
-    buildInputs = [ imagemagick ];
-
-    dontConfigure = true;
-    dontInstall = true;
-
-    buildPhase = ''
-      convert ./ide/coqide/coq.png -resize ${size}x${size} $out
-    '';
-  };
 
   definition = definitionWithPackages [];
 
@@ -57,8 +46,8 @@ rec {
       "{connection_file}"
     ];
     language = "coq";
-    logo32 = sizedLogo "32";
-    logo64 = sizedLogo "64";
+    logo32 = "${logos}/logo-32x32.png";
+    logo64 = "${logos}/logo-64x64.png";
     env = {
       COQPATH = lib.concatStringsSep ":" (map (x: "${x}/lib/coq/${coq.coq-version}/user-contrib/") packages);
     };

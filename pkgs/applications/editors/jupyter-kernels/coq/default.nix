@@ -22,7 +22,7 @@ in
 rec {
   launcher = runCommand "coq-kernel-launcher" {
     python = python3.withPackages (ps: [ ps.traitlets ps.jupyter_core ps.ipykernel kernel ]);
-    buildInputs = [ makeWrapper ];
+    nativeBuildInputs = [ makeWrapper ];
   } ''
     mkdir -p $out/bin
 

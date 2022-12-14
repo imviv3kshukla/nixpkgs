@@ -26,7 +26,7 @@ rec {
   } ''
     mkdir -p $out/bin
 
-    makeWrapper ${python.interpreter} $out/bin/coq-kernel \
+    makeWrapper ${python3.interpreter} $out/bin/coq-kernel \
       --add-flags "-m coq_jupyter" \
       --suffix PATH : ${coq}/bin
   '';

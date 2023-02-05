@@ -1,4 +1,4 @@
-{ stdenv, buildPackages }:
+{ stdenvNoCC, buildPackages }:
 
 # This function is for creating a flat-file binary cache, i.e. the kind created by
 # nix copy --to file:///some/path and usable as a substituter (with the file:// prefix).
@@ -10,7 +10,7 @@
 , rootPaths
 }:
 
-stdenv.mkDerivation {
+stdenvNoCC.mkDerivation {
   inherit name;
 
   __structuredAttrs = true;

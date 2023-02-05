@@ -19,9 +19,9 @@ stdenvNoCC.mkDerivation {
 
   preferLocalBuild = true;
 
-  PATH = "${buildPackages.coreutils}/bin:${buildPackages.jq}/bin:${buildPackages.python3}/bin:${buildPackages.nix}/bin:${buildPackages.xz}/bin";
+  nativeBuildInputs = [ buildPackages.coreutils buildPackages.jq buildPackages.python3 buildPackages.nix buildPackages.xz ];
 
-  builder = builtins.toFile "builder" ''
+  buildCommand = ''
     . .attrs.sh
 
     export out=''${outputs[out]}

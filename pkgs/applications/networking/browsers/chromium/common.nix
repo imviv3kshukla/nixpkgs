@@ -7,6 +7,7 @@
 # Native build inputs:
 , ninja, pkg-config
 , python3, perl
+, makeWrapper
 , which
 , llvmPackages
 # postPatch:
@@ -43,6 +44,7 @@
 , proprietaryCodecs ? true
 , pulseSupport ? false, libpulseaudio ? null
 , ungoogled ? false, ungoogled-chromium
+, waylandSupport ? true
 # Optional dependencies:
 , libgcrypt ? null # cupsSupport
 , systemdSupport ? stdenv.isLinux
@@ -126,6 +128,7 @@ let
     nativeBuildInputs = [
       ninja pkg-config
       python3WithPackages perl
+      makeWrapper
       which
       llvmPackages.bintools
     ];
@@ -260,8 +263,6 @@ let
       host_toolchain = "//build/toolchain/linux/unbundle:default";
       # Don't build against a sysroot image downloaded from Cloud Storage:
       use_sysroot = false;
-      # The default value is hardcoded instead of using pkg-config:
-      system_wayland_scanner_path = "${wayland.bin}/bin/wayland-scanner";
       # Because we use a different toolchain / compiler version:
       treat_warnings_as_errors = false;
       # We aren't compiling with Chrome's Clang (would enable Chrome-specific
@@ -295,6 +296,9 @@ let
       chrome_pgo_phase = 0;
       clang_base_path = "${llvmPackages.clang}";
       use_qt = false;
+    } // optionalAttrs waylandSupport {
+      # The default value is hardcoded instead of using pkg-config:
+      system_wayland_scanner_path = "${wayland.bin}/bin/wayland-scanner";
       # The default has changed to false. We'll build with libwayland from
       # Nixpkgs for now but might want to eventually use the bundled libwayland
       # as well to avoid incompatibilities (if this continues to be a problem

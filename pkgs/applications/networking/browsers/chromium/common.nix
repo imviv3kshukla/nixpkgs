@@ -7,6 +7,7 @@
 # Native build inputs:
 , ninja, pkg-config
 , python3, perl
+, makeWrapper
 , which
 , llvmPackages
 # postPatch:
@@ -44,6 +45,7 @@
 , proprietaryCodecs ? true
 , pulseSupport ? false, libpulseaudio ? null
 , ungoogled ? false, ungoogled-chromium
+, waylandSupport ? true
 # Optional dependencies:
 , libgcrypt ? null # cupsSupport
 , systemdSupport ? stdenv.isLinux
@@ -127,6 +129,7 @@ let
     nativeBuildInputs = [
       ninja pkg-config
       python3WithPackages perl
+      makeWrapper
       which
       llvmPackages.bintools
     ];
@@ -295,10 +298,15 @@ let
       chrome_pgo_phase = 0;
       clang_base_path = "${llvmPackages.clang}";
       use_qt = false;
-      # To fix the build as we don't provide libffi_pic.a
-      # (ld.lld: error: unable to find library -l:libffi_pic.a):
-      use_system_libffi = true;
-    } // lib.optionalAttrs proprietaryCodecs {
+    } // optionalAttrs waylandSupport {
+      # The default value is hardcoded instead of using pkg-config:
+      system_wayland_scanner_path = "${wayland.bin}/bin/wayland-scanner";
+      # The default has changed to false. We'll build with libwayland from
+      # Nixpkgs for now but might want to eventually use the bundled libwayland
+      # as well to avoid incompatibilities (if this continues to be a problem
+      # from time to time):
+      use_system_libwayland = true;
+    } // optionalAttrs proprietaryCodecs {
       # enable support for the H.264 codec
       proprietary_codecs = true;
       enable_hangout_services_extension = true;

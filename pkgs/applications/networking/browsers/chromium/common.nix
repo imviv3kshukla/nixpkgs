@@ -7,6 +7,7 @@
 # Native build inputs:
 , ninja, pkg-config
 , python3, perl
+, makeWrapper
 , which
 , llvmPackages
 # postPatch:
@@ -44,6 +45,7 @@
 , proprietaryCodecs ? true
 , pulseSupport ? false, libpulseaudio ? null
 , ungoogled ? false, ungoogled-chromium
+, useSystemLibffi ? true
 # Optional dependencies:
 , libgcrypt ? null # cupsSupport
 , systemdSupport ? lib.meta.availableOn stdenv.hostPlatform systemd
@@ -125,6 +127,7 @@ let
     nativeBuildInputs = [
       ninja pkg-config
       python3WithPackages perl
+      makeWrapper
       which
       llvmPackages.bintools
     ];
@@ -293,9 +296,6 @@ let
       chrome_pgo_phase = 0;
       clang_base_path = "${llvmPackages.clang}";
       use_qt = false;
-      # To fix the build as we don't provide libffi_pic.a
-      # (ld.lld: error: unable to find library -l:libffi_pic.a):
-      use_system_libffi = true;
     } // lib.optionalAttrs proprietaryCodecs {
       # enable support for the H.264 codec
       proprietary_codecs = true;
@@ -304,6 +304,10 @@ let
     } // lib.optionalAttrs pulseSupport {
       use_pulseaudio = true;
       link_pulseaudio = true;
+    } // lib.optionalAttrs useSystemLibffi {
+      # To fix the build as we don't provide libffi_pic.a
+      # (ld.lld: error: unable to find library -l:libffi_pic.a):
+      use_system_libffi = true;
     } // lib.optionalAttrs ungoogled (lib.importTOML ./ungoogled-flags.toml)
     // (extraAttrs.gnFlags or {}));
 

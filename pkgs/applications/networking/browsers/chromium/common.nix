@@ -7,6 +7,7 @@
 # Native build inputs:
 , ninja, pkg-config
 , python3, perl
+, makeWrapper
 , which
 , llvmPackages
 # postPatch:
@@ -125,6 +126,7 @@ let
     nativeBuildInputs = [
       ninja pkg-config
       python3WithPackages perl
+      makeWrapper
       which
       llvmPackages.bintools
     ];

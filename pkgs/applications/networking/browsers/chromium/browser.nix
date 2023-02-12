@@ -76,5 +76,5 @@ mkChromiumDerivation (base: rec {
 
   requiredSystemFeatures = [ "big-parallel" ];
 
-  meta = callPackage ./meta.nix { inherit channel ungoogled enableWideVine; };
+  meta = import ./meta.nix { inherit lib channel ungoogled enableWideVine; };
 })

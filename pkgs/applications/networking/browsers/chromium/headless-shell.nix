@@ -22,7 +22,7 @@ in
 mkChromiumDerivation (base: rec {
   name = "headless-shell";
   packageName = "chromium-headless-shell";
-  buildTargets = [ "chrome-sandbox" "headless-shell" ];
+  buildTargets = [ "chrome_sandbox" "headless_shell" ];
 
   outputs = ["out"];
 

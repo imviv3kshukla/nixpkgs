@@ -3,12 +3,11 @@
 , callPackage
 , fontconfig
 , makeWrapper
+, channel ? "stable"
+, ungoogled ? false
 }:
 
 let
-  channel = "stable";
-  ungoogled = false;
-
   mkChromiumDerivation = ((callPackage ./. {}).override {
     inherit channel ungoogled;
     useSystemLibffi = false;
@@ -18,12 +17,14 @@ let
     proprietaryCodecs = false;
   }).passthru.mkDerivation;
 
+  upstream-info = (lib.importJSON ./upstream-info.json).${channel};
+
 in
 
 mkChromiumDerivation (base: rec {
-  name = "headless_shell";
+  name = "headless-shell";
   packageName = "chromium-headless-shell";
-  buildTargets = [ "chrome_sandbox" "headless_shell" ];
+  buildTargets = [ "chrome-sandbox" "headless-shell" ];
 
   outputs = ["out"];
 
@@ -108,25 +109,16 @@ mkChromiumDerivation (base: rec {
 
   sandboxExecutableName = "chrome-sandbox";
 
-  passthru = { inherit sandboxExecutableName; };
-
   requiredSystemFeatures = [ "big-parallel" ];
 
-  meta = with lib; {
-    description = "An open source web browser from Google";
-    longDescription = ''
-      Chromium is an open source web browser from Google that aims to build a
-      safer, faster, and more stable way for all Internet users to experience
-      the web. It has a minimalist user interface and provides the vast majority
-      of source code for Google Chrome (which has some additional features).
-    '';
-    homepage = "https://www.chromium.org/";
-    license = licenses.bsd3;
-    platforms = platforms.linux;
-    mainProgram = "chromium";
-    hydraPlatforms = if (channel == "stable" || channel == "ungoogled-chromium")
-                     then ["aarch64-linux" "x86_64-linux"]
-                     else [];
-    timeout = 172800; # 48 hours (increased from the Hydra default of 10h)
+  meta = callPackage ./meta.nix {
+    inherit channel ungoogled;
+    enableWideVine = false;
+  };
+
+  passthru = {
+    inherit upstream-info;
+    mkDerivation = mkChromiumDerivation;
+    inherit sandboxExecutableName;
   };
 })

@@ -17,8 +17,6 @@ let
     proprietaryCodecs = false;
   }).passthru.mkDerivation;
 
-  upstream-info = (lib.importJSON ./upstream-info.json).${channel};
-
 in
 
 mkChromiumDerivation (base: rec {
@@ -117,7 +115,7 @@ mkChromiumDerivation (base: rec {
   };
 
   passthru = {
-    inherit upstream-info;
+    upstream-info = (lib.importJSON ./upstream-info.json).${channel};
     mkDerivation = mkChromiumDerivation;
     inherit sandboxExecutableName;
   };

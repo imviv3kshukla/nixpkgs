@@ -1,6 +1,7 @@
 { lib
 , channel
 , ungoogled
+, headlessShell ? false
 , enableWideVine
 }:
 
@@ -16,7 +17,9 @@
   homepage = if ungoogled
              then "https://github.com/Eloston/ungoogled-chromium"
              else "https://www.chromium.org/";
-  maintainers = with lib.maintainers; if ungoogled
+  maintainers = with lib.maintainers; if headlessShell
+                                      then [ thomasjm ]
+                                      else if ungoogled
                                       then [ squalus primeos michaeladler ]
                                       else [ primeos thefloweringash ];
   license = if enableWideVine then lib.licenses.unfree else lib.licenses.bsd3;

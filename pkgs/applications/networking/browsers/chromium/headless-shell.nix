@@ -111,6 +111,7 @@ mkChromiumDerivation (base: rec {
 
   meta = import ./meta.nix {
     inherit lib channel ungoogled;
+    headlessShell = true;
     enableWideVine = false;
   };
 

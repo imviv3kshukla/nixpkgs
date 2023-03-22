@@ -340,6 +340,25 @@ in rec {
     };
   };
 
+  mem-cpu-load = mkTmuxPlugin rec {
+    pluginName = "mem-cpu-load";
+    version = "3.6.1";
+    src = fetchFromGitHub {
+      owner = "thewtex";
+      repo = "tmux-mem-cpu-load";
+      rev = "v${version}";
+      sha256 = "sha256-DqUfThAdfwXaZ/2KCw5+68l0vxRd4Ie3lwgz/A/6l5U=";
+    };
+    nativeBuildInputs = [ pkgs.cmake ];
+    meta = with lib; {
+      description = "CPU, RAM, and load monitor for use with tmux";
+      homepage = "https://github.com/thewtex/tmux-mem-cpu-load";
+      license = licenses.asl20;
+      maintainers = with maintainers; [ thomasjm ];
+      platforms = platforms.all;
+    };
+  };
+
   net-speed = mkTmuxPlugin {
     pluginName = "net-speed";
     version = "unstable-2018-12-02";

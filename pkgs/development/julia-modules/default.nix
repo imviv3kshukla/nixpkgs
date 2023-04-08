@@ -3,6 +3,7 @@
 , runCommand
 , fetchFromGitHub
 , fetchgit
+, git
 , makeWrapper
 , writeTextFile
 , python3
@@ -34,9 +35,20 @@ let
       "$out"
   '';
 
+  repoify = name: src:
+    runCommand ''julia-${name}-repoified'' {buildInputs = [git];} ''
+      mkdir -p $out
+      cp -r ${src}/. $out
+      cd $out
+      git init
+      git add . -f
+      git config user.email "julia2nix@localhost"
+      git config user.name "julia2nix"
+      git commit -m "Dummy commit"
+    '';
   dependenciesYaml = writeTextFile {
     name = "julia-dependencies.yml";
-    text = lib.generators.toYAML {} (import dependencies { inherit fetchgit; });
+    text = lib.generators.toYAML {} (lib.mapAttrs repoify (import dependencies { inherit fetchgit; }));
   };
 
   minimalRegistry = runCommand "minimal-julia-registry" { buildInputs = [(python3.withPackages (ps: with ps; [toml pyyaml]))]; } ''

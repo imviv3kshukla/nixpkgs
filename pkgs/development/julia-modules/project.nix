@@ -1,15 +1,16 @@
-{ runCommand
+{ lib
+, runCommand
 , cacert
 , curl
 , julia
-, extraLibs
 , augmentedRegistry
+, extraLibs
+, packageNames
 }:
 
 runCommand "julia-project" {
     buildInputs = [curl julia] ++ extraLibs;
     registry = augmentedRegistry;
-    inherit precompile;
   } ''
   export HOME=$(pwd)
 
@@ -30,6 +31,8 @@ runCommand "julia-project" {
   julia -e ' \
     import Pkg
     Pkg.Registry.add(Pkg.RegistrySpec(path="${augmentedRegistry}"))
+    Pkg.add(${lib.generators.toJSON {} packageNames})
+    Pkg.instantiate()
   '
 
   cp Project.toml $out

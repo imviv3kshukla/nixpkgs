@@ -25,6 +25,11 @@ with open(dependencies_path, "r") as f:
   uuid_to_store_path = yaml.safe_load(f)
 
 registry = toml.load(registry_path / "Registry.toml")
+registry["packages"] = {k: v for k, v in registry["packages"].items() if k in uuid_to_versions}
+os.makedirs(out_path)
+with open(out_path / "Registry.toml", "w") as f:
+    toml.dump(registry, f)
+
 
 for (uuid, versions) in uuid_to_versions.items():
     if not uuid in registry["packages"]: continue

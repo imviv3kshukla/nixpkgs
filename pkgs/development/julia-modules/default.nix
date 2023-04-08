@@ -9,6 +9,7 @@
 
 , julia
 , extraLibs ? []
+, packageNames ? ["IJulia" "Plots"]
 , precompile ? true
 , makeWrapperArgs ? ""
 }:
@@ -22,8 +23,7 @@ let
   };
 
   closureYaml = callPackage ./package-closure.nix {
-    inherit julia augmentedRegistry;
-    packageNames = ["IJulia" "Plots"];
+    inherit julia augmentedRegistry packageNames;
   };
 
   dependencies = runCommand "julia-sources.nix" { buildInputs = [(python3.withPackages (ps: with ps; [toml pyyaml]))]; } ''
@@ -47,9 +47,10 @@ let
       "$out"
   '';
 
-  depot = callPackage ./depot.nix { inherit augmentedRegistry extraLibs precompile; };
-
-  project = callPackage ./project.nix { inherit augmentedRegistry extraLibs precompile; };
+  projectAndDepot = callPackage ./depot.nix {
+    inherit extraLibs packageNames precompile;
+    registry = minimalRegistry;
+  };
 
 in
 
@@ -58,7 +59,7 @@ runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
   makeWrapper ${julia}/bin/julia $out/bin/julia \
     --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \
     --set PYTHON ${python3}/bin/python \
-    --suffix JULIA_DEPOT_PATH : "${depot}" \
-    --suffix JULIA_PROJECT : "${project}" \
+    --suffix JULIA_DEPOT_PATH : "${projectAndDepot}/depot" \
+    --suffix JULIA_PROJECT : "${projectAndDepot}/project" \
     --suffix PATH : ${python3}/bin $makeWrapperArgs
 ''

@@ -1,23 +1,27 @@
-{ runCommand
+{ lib
+, runCommand
 , cacert
 , curl
 , julia
 , extraLibs
-, augmentedRegistry
+, packageNames
 , precompile
+, registry
 }:
 
 runCommand "julia-depot" {
     buildInputs = [curl julia] ++ extraLibs;
-    registry = augmentedRegistry;
-    inherit precompile;
+    inherit precompile registry;
   } ''
   export HOME=$(pwd)
 
   echo "Using registry $registry"
-  echo "Using Julia ${julia}/bin/julia"
 
-  export JULIA_PROJECT="$out"
+  mkdir -p $out/project
+  export JULIA_PROJECT="$out/project"
+
+  mkdir -p $out/depot
+  export JULIA_DEPOT_PATH="$out/depot"
 
   # mkdir -p $out/artifacts
   # cp $overridesToml $out/artifacts/Overrides.toml
@@ -27,11 +31,11 @@ runCommand "julia-depot" {
   # Turn off auto precompile so it can be controlled by us below
   export JULIA_PKG_PRECOMPILE_AUTO=0
 
-  export JULIA_DEPOT_PATH=$out
   julia -e ' \
     import Pkg
-    Pkg.Registry.add(Pkg.RegistrySpec(path="${augmentedRegistry}"))
+    Pkg.Registry.add(Pkg.RegistrySpec(path="${registry}"))
 
+    Pkg.add(${lib.generators.toJSON {} packageNames})
     Pkg.instantiate()
 
     if "precompile" in keys(ENV) && ENV["precompile"] != "0"

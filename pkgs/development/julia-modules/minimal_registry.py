@@ -21,7 +21,7 @@ uuid_to_versions = defaultdict(list)
 for pkg in desired_packages:
     uuid_to_versions[pkg["uuid"]].append(pkg["version"])
 
-registry = toml.load(registry_path.joinpath("Registry.toml"))
+registry = toml.load(registry_path / "Registry.toml")
 
 uuid_and_version_to_fetch_info = {}
 

@@ -19,7 +19,7 @@ let
   };
 
   minimalRegistry = runCommand "minimal-julia-registry" { buildInputs = [(python3.withPackages (ps: with ps; [toml pyyaml]))]; } ''
-    python ${./build_minimal_registry.py} \
+    python ${./minimal_registry.py} \
       "${augmentedRegistry}" \
       "${closureYaml}" \
       "$out"
@@ -27,11 +27,9 @@ let
 
 in
 
-closureYaml
-
-# runCommand "julia-sources.nix" { buildInputs = [(python3.withPackages (ps: with ps; [pyyaml]))]; } ''
-#   python ${./build_sources_nix.py} \
-#     "${augmentedRegistry}" \
-#     "${closureYaml}" \
-#     "$out"
-# '';
+runCommand "julia-sources.nix" { buildInputs = [(python3.withPackages (ps: with ps; [pyyaml]))]; } ''
+  python ${./sources_nix.py} \
+    "${augmentedRegistry}" \
+    "${closureYaml}" \
+    "$out"
+''

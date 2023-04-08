@@ -17,6 +17,7 @@ with open(desired_packages_path, "r") as f:
 registry = toml.load(registry_path / "Registry.toml")
 
 with open(os.environ["OUT"], "w") as f:
+  f.write("{fetchgit}:\n")
   f.write("{\n")
   for pkg in desired_packages:
       uuid = pkg["uuid"]
@@ -24,12 +25,16 @@ with open(os.environ["OUT"], "w") as f:
 
       registry_info = registry["packages"][uuid]
       path = registry_info["path"]
-      packageToml = toml.load(registry_path / f / "Package.toml")
+      packageToml = toml.load(registry_path / path / "Package.toml")
+
+      all_versions = toml.load(registry_path / path / "Versions.toml")
+      if not pkg["version"] in all_versions: continue
+      version_to_use = all_versions[pkg["version"]]
 
       repo = packageToml["repo"]
-      rev = "foo" # pkg[""]
-      f.write(f"""{uuid} = fetchgit {
-        url = {repo};
-        rev = {rev};
-      };\n""")
+      f.write(f"""  "{uuid}" = fetchgit {{
+    url = "{repo}";
+    rev = "{version_to_use["git-tree-sha1"]}";
+    sha256 = "{version_to_use["nix-sha256"]}";
+  }};\n""")
   f.write("}")

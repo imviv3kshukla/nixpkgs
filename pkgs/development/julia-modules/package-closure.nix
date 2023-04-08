@@ -1,4 +1,5 @@
-{ runCommand
+{ lib
+, runCommand
 , julia
 , augmentedRegistry
 , packageNames
@@ -17,7 +18,7 @@ runCommand "julia-package.yml" { buildInputs = [julia]; } ''
     import Pkg.Types: PackageSpec, VersionSpec, PRESERVE_NONE, project_deps_resolve!, registry_resolve!, stdlib_resolve!, ensure_resolved
     import Pkg.Operations: assert_can_add, _resolve, update_package_add
 
-    input = ["IJulia", "Plots"]
+    input = ${lib.generators.toJSON {} packageNames}
     pkgs = [PackageSpec(pkg) for pkg in input]
     foreach(handle_package_input!, pkgs)
 
@@ -41,7 +42,6 @@ runCommand "julia-package.yml" { buildInputs = [julia]; } ''
     # resolve
     pkgs, deps_map = _resolve(ctx.io, ctx.env, ctx.registries, pkgs, PRESERVE_NONE, ctx.julia_version)
 
-    println("Writing to: " * ENV["OUT"])
     open(ENV["OUT"], "w") do io
       for spec in pkgs
           println(io, "- name: " * spec.name)

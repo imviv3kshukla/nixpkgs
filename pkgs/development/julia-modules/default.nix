@@ -3,11 +3,14 @@
 , runCommand
 , fetchFromGitHub
 , fetchgit
+, makeWrapper
 , writeTextFile
 , python3
+
 , julia
 , extraLibs ? []
 , precompile ? true
+, makeWrapperArgs ? ""
 }:
 
 let
@@ -44,8 +47,18 @@ let
       "$out"
   '';
 
-  depot = callPackage ./depot.nix { inherit augmentedRegistry precompile; };
+  depot = callPackage ./depot.nix { inherit augmentedRegistry extraLibs precompile; };
+
+  project = callPackage ./project.nix { inherit augmentedRegistry extraLibs precompile; };
 
 in
 
-depot
+runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
+  mkdir -p $out/bin
+  makeWrapper ${julia}/bin/julia $out/bin/julia \
+    --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \
+    --set PYTHON ${python3}/bin/python \
+    --suffix JULIA_DEPOT_PATH : "${depot}" \
+    --suffix JULIA_PROJECT : "${project}" \
+    --suffix PATH : ${python3}/bin $makeWrapperArgs
+''

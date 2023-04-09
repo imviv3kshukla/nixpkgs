@@ -8,6 +8,7 @@
 , makeWrapper
 , writeTextFile
 , python3
+, stdenv
 
 , julia
 , extraLibs ? []
@@ -83,7 +84,7 @@ let
   '';
 
   # Import the artifacts Nix to build Overrides.toml (IFD)
-  overridesToml = import artifactsNix { inherit fetchurl writeTextFile; };
+  overridesToml = import artifactsNix { inherit fetchurl stdenv writeTextFile; };
 
   # Build a Julia project and depot. The project contains Project.toml/Manifest.toml, while the
   # depot contains package build products (including the precompiled libraries, if precompile=true)

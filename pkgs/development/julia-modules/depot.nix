@@ -25,6 +25,10 @@ runCommand "julia-depot" {
   export JULIA_DEPOT_PATH="$out/depot"
   cp ${overridesToml} $out/depot/artifacts/Overrides.toml
 
+  # These can be useful to debug problems
+  # export JULIA_DEBUG=Pkg
+  # export JULIA_DEBUG=loading
+
   export JULIA_SSL_CA_ROOTS_PATH="${cacert}/etc/ssl/certs/ca-bundle.crt"
 
   export JULIA_PKG_PRECOMPILE_AUTO=0
@@ -33,6 +37,7 @@ runCommand "julia-depot" {
     import Pkg
     Pkg.Registry.add(Pkg.RegistrySpec(path="${registry}"))
 
+    # Pkg.Artifacts.load_overrides(;force=true)
     Pkg.add(${lib.generators.toJSON {} packageNames})
     Pkg.instantiate()
 

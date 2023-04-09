@@ -21,7 +21,7 @@ runCommand "julia-package-names.nix" { buildInputs = [(python3.withPackages (ps:
   registry = packageToml = toml.load(Path("${registry}") / "Registry.toml")
 
   with open(os.environ["OUT"], "w") as f:
-    f.write("[")
+    f.write("[\n")
     for name in sorted(v["name"] for k, v in registry["packages"].items()):
       f.write('  "' + name + '"\n')
     f.write("]")

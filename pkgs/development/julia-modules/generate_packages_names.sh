@@ -12,4 +12,5 @@ OUTPUT="$(nix build \
            --expr 'with import <nixpkgs> {}; callPackage ./generate-package-names.nix {}' \
            --json | jq -r '.[0].outputs.out')"
 
+rm -f ./package-names.nix
 cp "$OUTPUT" ./package-names.nix

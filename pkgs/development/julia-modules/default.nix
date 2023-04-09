@@ -71,7 +71,14 @@ let
       "$out"
   '';
 
-  # Next, deal with artifacts. Scan each artifacts file individually.
+  # Next, deal with artifacts. Scan each artifacts file individually and generate a Nix file that
+  # produces the desired Overrides.toml.
+  artifactsNix = runCommand "julia-artifacts.nix" { buildInputs = [(python3.withPackages (ps: with ps; [toml pyyaml]))]; } ''
+    python ${./extract_artifacts.py} \
+      "${dependenciesYaml}" \
+      "$out"
+  '';
+
 
   # Build a Julia project and depot. The project contains Project.toml/Manifest.toml, while the
   # depot contains package build products (including the precompiled libraries, if precompile=true)
@@ -82,12 +89,14 @@ let
 
 in
 
-runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
-  mkdir -p $out/bin
-  makeWrapper ${julia}/bin/julia $out/bin/julia \
-    --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \
-    --set PYTHON ${python3}/bin/python \
-    --suffix JULIA_DEPOT_PATH : "${projectAndDepot}/depot" \
-    --suffix JULIA_PROJECT : "${projectAndDepot}/project" \
-    --suffix PATH : ${python3}/bin $makeWrapperArgs
-''
+artifactsNix
+
+# runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
+#   mkdir -p $out/bin
+#   makeWrapper ${julia}/bin/julia $out/bin/julia \
+#     --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \
+#     --set PYTHON ${python3}/bin/python \
+#     --suffix JULIA_DEPOT_PATH : "${projectAndDepot}/depot" \
+#     --suffix JULIA_PROJECT : "${projectAndDepot}/project" \
+#     --suffix PATH : ${python3}/bin $makeWrapperArgs
+# ''

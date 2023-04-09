@@ -12,10 +12,11 @@
 
 , julia
 , extraLibs ? []
-, packageNames ? ["IJulia" "Plots"]
 , precompile ? true
 , makeWrapperArgs ? ""
 }:
+
+packageNames:
 
 let
   # Special registry which is equal to JuliaRegistries/General, but every Versions.toml
@@ -95,7 +96,18 @@ let
 
 in
 
-runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
+runCommand "julia-${julia.version}-env" {
+  buildInputs = [makeWrapper];
+
+  # Expose the steps we used along the way in case the user wants to use them, for example to build
+  # expressions and build them separately to avoid IFD.
+  inherit dependencies;
+  inherit dependenciesYaml;
+  inherit minimalRegistry;
+  inherit artifactsNix;
+  inherit overridesToml;
+  inherit projectAndDepot;
+} ''
   mkdir -p $out/bin
   makeWrapper ${julia}/bin/julia $out/bin/julia \
     --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \

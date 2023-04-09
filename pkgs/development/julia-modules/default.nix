@@ -3,6 +3,7 @@
 , runCommand
 , fetchFromGitHub
 , fetchgit
+, fetchurl
 , git
 , makeWrapper
 , writeTextFile
@@ -76,27 +77,29 @@ let
   artifactsNix = runCommand "julia-artifacts.nix" { buildInputs = [(python3.withPackages (ps: with ps; [toml pyyaml]))]; } ''
     python ${./extract_artifacts.py} \
       "${dependenciesYaml}" \
+      "${julia}/bin/julia" \
+      "${./extract_artifacts.jl}" \
       "$out"
   '';
 
+  # Import the artifacts Nix to build Overrides.toml (IFD)
+  overridesToml = import artifactsNix { inherit fetchurl writeTextFile; };
 
   # Build a Julia project and depot. The project contains Project.toml/Manifest.toml, while the
   # depot contains package build products (including the precompiled libraries, if precompile=true)
   projectAndDepot = callPackage ./depot.nix {
-    inherit extraLibs packageNames precompile;
+    inherit extraLibs overridesToml packageNames precompile;
     registry = minimalRegistry;
   };
 
 in
 
-artifactsNix
-
-# runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
-#   mkdir -p $out/bin
-#   makeWrapper ${julia}/bin/julia $out/bin/julia \
-#     --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \
-#     --set PYTHON ${python3}/bin/python \
-#     --suffix JULIA_DEPOT_PATH : "${projectAndDepot}/depot" \
-#     --suffix JULIA_PROJECT : "${projectAndDepot}/project" \
-#     --suffix PATH : ${python3}/bin $makeWrapperArgs
-# ''
+runCommand "julia-${julia.version}-env" { buildInputs = [makeWrapper]; } ''
+  mkdir -p $out/bin
+  makeWrapper ${julia}/bin/julia $out/bin/julia \
+    --suffix LD_LIBRARY_PATH : "${lib.makeLibraryPath extraLibs}" \
+    --set PYTHON ${python3}/bin/python \
+    --suffix JULIA_DEPOT_PATH : "${projectAndDepot}/depot" \
+    --suffix JULIA_PROJECT : "${projectAndDepot}/project" \
+    --suffix PATH : ${python3}/bin $makeWrapperArgs
+''

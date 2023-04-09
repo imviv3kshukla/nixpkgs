@@ -4,6 +4,7 @@
 , curl
 , julia
 , extraLibs
+, overridesToml
 , packageNames
 , precompile
 , registry
@@ -20,15 +21,12 @@ runCommand "julia-depot" {
   mkdir -p $out/project
   export JULIA_PROJECT="$out/project"
 
-  mkdir -p $out/depot
+  mkdir -p $out/depot/artifacts
   export JULIA_DEPOT_PATH="$out/depot"
-
-  # mkdir -p $out/artifacts
-  # cp $overridesToml $out/artifacts/Overrides.toml
+  cp ${overridesToml} $out/depot/artifacts/Overrides.toml
 
   export JULIA_SSL_CA_ROOTS_PATH="${cacert}/etc/ssl/certs/ca-bundle.crt"
 
-  # Turn off auto precompile so it can be controlled by us below
   export JULIA_PKG_PRECOMPILE_AUTO=0
 
   julia -e ' \

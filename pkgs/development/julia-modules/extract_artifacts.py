@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import multiprocessing
 import subprocess
 import sys
 import toml
@@ -20,14 +21,14 @@ with open(out_path, "w") as f:
   f.write("  name = \"Overrides.toml\";\n")
   f.write("  text = ''\n")
 
-  # TODO: this loop is slow, use threadpool
-  lines = []
-  for uuid, src in dependencies.items():
+  def process_item(item):
+    uuid, src = item
+    lines = []
     artifacts = toml.loads(subprocess.check_output([julia_path, extract_artifacts_script, uuid, src]).decode())
-    if not artifacts: continue
+    if not artifacts: return
 
     for artifact_name, details in artifacts.items():
-      if len(details["download"]) == 0: continue
+      if len(details["download"]) == 0: return
       download = details["download"][0]
       url = download["url"]
       sha256 = download["sha256"]
@@ -35,18 +36,23 @@ with open(out_path, "w") as f:
       git_tree_sha1 = details["git-tree-sha1"]
 
       lines.append('%s = "${stdenv.mkDerivation %s}"' % (git_tree_sha1, f"""{{
-  name = "{artifact_name}";
-  src = fetchurl {{ url = "{url}"; sha256 = "{sha256}"; }};
-  sourceRoot = ".";
-  dontConfigure = true;
-  dontBuild = true;
-  installPhase = "cp -r . $out";
-  dontFixup = true;
-}}"""))
+    name = "{artifact_name}";
+    src = fetchurl {{ url = "{url}"; sha256 = "{sha256}"; }};
+    sourceRoot = ".";
+    dontConfigure = true;
+    dontBuild = true;
+    installPhase = "cp -r . $out";
+    dontFixup = true;
+  }}"""))
       lines.append("")
 
-  contents = "\n".join(lines)
-  f.write(contents)
+    return "\n".join(lines)
+
+  with multiprocessing.Pool(10) as pool:
+    results = pool.map(process_item, dependencies.items())
+    for s in (x for x in results if x is not None):
+      f.write(s)
+
   f.write(f"""
   '';
 }}\n""")

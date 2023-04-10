@@ -32,7 +32,11 @@ runCommand "julia-depot" {
 
   export JULIA_SSL_CA_ROOTS_PATH="${cacert}/etc/ssl/certs/ca-bundle.crt"
 
+  # Only precompile if configured to below
   export JULIA_PKG_PRECOMPILE_AUTO=0
+
+  # Prevent a warning where Julia tries to download package server info
+  export JULIA_PKG_SERVER=""
 
   julia -e ' \
     import Pkg

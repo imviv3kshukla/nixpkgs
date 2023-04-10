@@ -34,7 +34,6 @@ let
   #   ...
   # }
   dependencies = runCommand "julia-sources.nix" { buildInputs = [(python3.withPackages (ps: with ps; [toml pyyaml]))]; } ''
-    export OUT="$out"
     python ${./sources_nix.py} \
       "${augmentedRegistry}" \
       "${closureYaml}" \

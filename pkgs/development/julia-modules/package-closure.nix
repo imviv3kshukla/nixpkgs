@@ -10,6 +10,9 @@ runCommand "julia-package.yml" { buildInputs = [julia]; } ''
   export HOME=$(pwd)/home
   export OUT="$out"
 
+  # Prevent a warning where Julia tries to download package server info
+  export JULIA_PKG_SERVER=""
+
   julia -e ' \
     import Pkg
     Pkg.Registry.add(Pkg.RegistrySpec(path="${augmentedRegistry}"))

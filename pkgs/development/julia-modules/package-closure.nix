@@ -10,6 +10,11 @@ runCommand "julia-package.yml" { buildInputs = [julia]; } ''
   export HOME=$(pwd)/home
   export OUT="$out"
 
+  echo "Resolving Julia packages with the following inputs"
+  echo "Julia: ${julia}"
+  echo "Registry: ${augmentedRegistry}"
+  echo "Packages: ${lib.generators.toJSON {} packageNames}"
+
   # Prevent a warning where Julia tries to download package server info
   export JULIA_PKG_SERVER=""
 

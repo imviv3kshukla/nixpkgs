@@ -85,7 +85,12 @@ let
   '';
 
   # Import the artifacts Nix to build Overrides.toml (IFD)
-  overridesToml = import artifactsNix { inherit fetchurl stdenv writeTextFile; };
+  overridesTomlRaw = import artifactsNix { inherit fetchurl stdenv writeTextFile; };
+  overridesToml = runCommand "Overrides.toml" { buildInputs = [(python3.withPackages (ps: with ps; [toml]))]; } ''
+    python ${./dedup_overrides.py} \
+      "${overridesTomlRaw}" \
+      "$out"
+  '';
 
   # Build a Julia project and depot. The project contains Project.toml/Manifest.toml, while the
   # depot contains package build products (including the precompiled libraries, if precompile=true)
@@ -106,6 +111,7 @@ runCommand "julia-${julia.version}-env" {
   inherit minimalRegistry;
   inherit artifactsNix;
   inherit overridesToml;
+  inherit overridesTomlRaw;
   inherit projectAndDepot;
 } ''
   mkdir -p $out/bin

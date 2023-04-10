@@ -45,7 +45,7 @@ runCommand "julia-depot" {
     Pkg.Registry.add(Pkg.RegistrySpec(path="${registry}"))
 
     # Pkg.Artifacts.load_overrides(;force=true)
-    Pkg.add(${lib.generators.toJSON {} packageNames})
+    Pkg.add(unique(${lib.generators.toJSON {} packageNames}))
     Pkg.instantiate()
 
     if "precompile" in keys(ENV) && ENV["precompile"] != "0"

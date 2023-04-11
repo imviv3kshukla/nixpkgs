@@ -1,6 +1,6 @@
 { lib
 , runCommand
-, julia
+, julia-bin
 , augmentedRegistry
 , packageNames
 }:
@@ -8,7 +8,7 @@
 let
   # The specific package resolution code depends on the Julia version
   # These are pretty similar and could be combined to reduce duplication
-  resolveCode = if lib.versionOlder julia.version "1.7" then resolveCode1_6 else resolveCode1_8;
+  resolveCode = if lib.versionOlder julia-bin.version "1.7" then resolveCode1_6 else resolveCode1_8;
 
   resolveCode1_6 = ''
     import Pkg.API: check_package_name
@@ -75,13 +75,13 @@ let
 
 in
 
-runCommand "julia-package.yml" { buildInputs = [julia]; } ''
+runCommand "julia-package.yml" { buildInputs = [julia-bin]; } ''
   mkdir home
   export HOME=$(pwd)/home
   export OUT="$out"
 
   echo "Resolving Julia packages with the following inputs"
-  echo "Julia: ${julia}"
+  echo "Julia: ${julia-bin}"
   echo "Registry: ${augmentedRegistry}"
   echo "Packages: ${lib.generators.toJSON {} packageNames}"
 

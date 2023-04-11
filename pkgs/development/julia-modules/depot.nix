@@ -2,7 +2,7 @@
 , runCommand
 , cacert
 , curl
-, julia
+, julia-bin
 , extraLibs
 , overridesToml
 , packageNames
@@ -11,13 +11,13 @@
 }:
 
 runCommand "julia-depot" {
-    buildInputs = [curl julia] ++ extraLibs;
+    buildInputs = [curl julia-bin] ++ extraLibs;
     inherit precompile registry;
   } ''
   export HOME=$(pwd)
 
   echo "Building Julia depot and project with the following inputs"
-  echo "Julia: ${julia}"
+  echo "Julia: ${julia-bin}"
   echo "Registry: $registry"
   echo "Overrides ${overridesToml}"
 

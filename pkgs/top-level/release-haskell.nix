@@ -50,6 +50,7 @@ let
   # list of all compilers to test specific packages on
   all = with compilerNames; [
     ghc884
+    ghc884-custom
     ghc8107
     ghc901
   ];

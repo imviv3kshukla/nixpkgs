@@ -219,6 +219,11 @@ in {
       ghc = bh.compiler.ghc884;
       compilerConfig = callPackage ../development/haskell-modules/configuration-ghc-8.8.x.nix { };
     };
+    ghc884-custom = callPackage ../development/haskell-modules {
+      buildHaskellPackages = bh.packages.ghc884-custom;
+      ghc = bh.compiler.ghc884-custom;
+      compilerConfig = callPackage ../development/haskell-modules/configuration-ghc-8.8.x.nix { };
+    };
     ghc8107 = callPackage ../development/haskell-modules {
       buildHaskellPackages = bh.packages.ghc8107;
       ghc = bh.compiler.ghc8107;

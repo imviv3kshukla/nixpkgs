@@ -161,8 +161,8 @@ stdenv.mkDerivation (rec {
   pname = "${targetPrefix}ghc${variantSuffix}";
 
   src = fetchurl {
-    url = "https://ghcbuilds.s3.ap-south-1.amazonaws.com/ghc-8.8.4.20230519-x86_64-unknown-linux.tar.xz";
-    sha256 = "08rwc99cmd4cmv8c8id4a8h6p9h9fvka6svrfsma0xn91anij1xl";
+    url = "https://ghcbuilds.s3.ap-south-1.amazonaws.com/ghc-8.8.4.20230519-src.tar.xz";
+    sha256 = "1znpr63g1yf9x2whibjhd93ir0z8wnidlq360smg8rzrppsswwj2";
   };
 
   enableParallelBuilding = true;
